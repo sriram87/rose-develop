@@ -604,7 +604,7 @@ class AnalysisATSSets: public AnalysisATSContainers<std::set<T>, std::set<Analys
   }*/
 
   void insert(const AnalysisATS<T>& newObj) {
-    validateObjToAdd(newObj);
+    this->validateObjToAdd(newObj);
     AnalysisATSContainers<std::set<T>, std::set<AnalysisATS<T> >, T>::cont.insert(newObj);
   }
 
@@ -631,12 +631,12 @@ class AnalysisATSLists: public AnalysisATSContainers<std::list<T>, std::list<Ana
   }*/
 
   void push_front(const AnalysisATS<T>& newObj) {
-    validateObjToAdd(newObj);
+    this->validateObjToAdd(newObj);
     AnalysisATSContainers<std::list<T>, std::list<AnalysisATS<T> >, T>::cont.push_front(newObj);
   }
 
   void push_back(const AnalysisATS<T>& newObj) {
-    validateObjToAdd(newObj);
+    this->validateObjToAdd(newObj);
     AnalysisATSContainers<std::list<T>, std::list<AnalysisATS<T> >, T>::cont.push_back(newObj);
   }
 
@@ -663,12 +663,12 @@ class AnalysisATSVectors: public AnalysisATSContainers<std::vector<T>, std::vect
   }*/
 
   void push_front(const AnalysisATS<T>& newObj) {
-    validateObjToAdd(newObj);
+    this->validateObjToAdd(newObj);
     AnalysisATSContainers<std::vector<T>, std::vector<AnalysisATS<T> >, T>::cont.push_front(newObj);
   }
 
   void push_back(const AnalysisATS<T>& newObj) {
-    validateObjToAdd(newObj);
+    this->validateObjToAdd(newObj);
     AnalysisATSContainers<std::vector<T>, std::vector<AnalysisATS<T> >, T>::cont.push_back(newObj);
   }
 

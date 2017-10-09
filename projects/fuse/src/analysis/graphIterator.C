@@ -194,7 +194,7 @@ bool graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::isRemaining(const GraphEdgeP
 template <class GraphEdgePtr, class GraphNodePtr>
 void graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::pushAllDescendants(GraphEdgePtr pedge)
 {
-  list<GraphEdgePtr> nextE = Part2DirEdges(PartEdge2DirPart(pedge));
+  list<GraphEdgePtr> nextE = Part2DirEdges(this->PartEdge2DirPart(pedge));
 
   //dbg << "pushAllDescendants(): #nextE="<<nextE.size()<<endl;
   for(typename list<GraphEdgePtr>::iterator it=nextE.begin(); it!=nextE.end(); it++)
@@ -415,7 +415,7 @@ template <class GraphEdgePtr, class GraphNodePtr>
 GraphNodePtr graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::getPart() const
 {
   assert(initialized);
-  return PartEdge2DirPart(getPartEdge());
+  return this->PartEdge2DirPart(getPartEdge());
 }
 
 // Grab the Part within the current PartEdge in the iterator's direction of motion (target for fw, source for bw)
@@ -424,7 +424,7 @@ template <class GraphEdgePtr, class GraphNodePtr>
 GraphNodePtr graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::grabPart()
 {
   assert(initialized);
-  return PartEdge2DirPart(grabPartEdge());
+  return this->PartEdge2DirPart(grabPartEdge());
 }
 
 /*template <class GraphEdgePtr, class GraphNodePtr>
@@ -718,7 +718,7 @@ void dataflowGraphEdgeIterator<GraphEdgePtr, GraphNodePtr>::init(const GraphNode
 template <class GraphEdgePtr, class GraphNodePtr>
 void dataflowGraphEdgeIterator<GraphEdgePtr, GraphNodePtr>::addStart(GraphNodePtr start)
 {
-  add(Part2PartEdge(start));
+  this->add(this->Part2PartEdge(start));
 }
 
 // Add the given PartEdge to the iterator's list of edges to follow
@@ -726,7 +726,7 @@ template <class GraphEdgePtr, class GraphNodePtr>
 void dataflowGraphEdgeIterator<GraphEdgePtr, GraphNodePtr>::add_internal(GraphEdgePtr next)
 {
   // Never add a terminator state
-  if(terminators.find(PartEdge2DirPart(next)) != terminators.end()) return;
+  if(terminators.find(this->PartEdge2DirPart(next)) != terminators.end()) return;
 
   graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::add_internal(next);
 }

@@ -160,6 +160,7 @@ echo "GFORTRAN_PATH = $GFORTRAN_PATH"
   ROSE_SUPPORT_ISL
   ROSE_SUPPORT_MPI
   ROSE_SUPPORT_SPOT
+  ROSE_SUPPORT_SIGHT
 
 ##
 #########################################################################################

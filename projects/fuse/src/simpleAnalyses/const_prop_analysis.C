@@ -932,35 +932,35 @@ void ConstantPropagationAnalysisTransfer::visit(SgPntrArrRefExp *paRef) {
     } else assert(0);
   } else assert(0);*/
   //MemLocObjectPtr ml = composer->OperandExpr2MemLoc(paRef, paRef->get_lhs_operand(), part->inEdgeFromAny(), analysis);
-  MemLocObjectPtr ml = analysis->OperandExpr2MemLocUse(paRef, paRef->get_lhs_operand(), parts.NodeState()->inEdgeFromAny());
-  SIGHT_VERB(dbg << "ml="<<(ml? ml->str(): "NULL")<<endl, 1, CPDebugLevel)
-  CombinedMemLocObjectPtr mlUnion = boost::dynamic_pointer_cast<CombinedMemLocObject>(ml);
-  assert(mlUnion);
-  const std::list<MemLocObjectPtr>& mlVals = mlUnion->getMemLocs();
-  assert(mlVals.size()==1);
-  CPMemLocObjectPtr core = boost::dynamic_pointer_cast<CPMemLocObject>(*mlVals.begin());
-  assert(core);
-  SIGHT_VERB(dbg << "core="<<(core? core->str(): "NULL")<<endl, 1, CPDebugLevel)
+  // MemLocObjectPtr ml = analysis->OperandExpr2MemLocUse(paRef, paRef->get_lhs_operand(), parts.NodeState()->inEdgeFromAny());
+  // SIGHT_VERB(dbg << "ml="<<(ml? ml->str(): "NULL")<<endl, 1, CPDebugLevel)
+  // CombinedMemLocObjectPtr mlUnion = boost::dynamic_pointer_cast<CombinedMemLocObject>(ml);
+  // assert(mlUnion);
+  // const std::list<MemLocObjectPtr>& mlVals = mlUnion->getMemLocs();
+  // assert(mlVals.size()==1);
+  // CPMemLocObjectPtr core = boost::dynamic_pointer_cast<CPMemLocObject>(*mlVals.begin());
+  // assert(core);
+  // SIGHT_VERB(dbg << "core="<<(core? core->str(): "NULL")<<endl, 1, CPDebugLevel)
 
-  // In expression array[i], the value location denoted by "i"
-  ValueObjectPtr val = composer->OperandExpr2Val(paRef, paRef->get_rhs_operand(), parts.NodeState()->inEdgeFromAny(), analysis);
-  SIGHT_VERB(dbg << "val="<<val->str()<<endl, 1, CPDebugLevel)
-  CombinedValueObjectPtr indexUnion = boost::dynamic_pointer_cast<CombinedValueObject>(val);
-  assert(indexUnion);
-  const std::list<ValueObjectPtr>& indexVals = indexUnion->getValues();
-  assert(indexVals.size()==1);
-  CPValueObjectPtr index = boost::dynamic_pointer_cast<CPValueObject>(*indexVals.begin());
-  assert(index);
-  SIGHT_VERB(dbg << "index="<<index->str()<<endl, 1, CPDebugLevel)
+  // // In expression array[i], the value location denoted by "i"
+  // ValueObjectPtr val = composer->OperandExpr2Val(paRef, paRef->get_rhs_operand(), parts.NodeState()->inEdgeFromAny(), analysis);
+  // SIGHT_VERB(dbg << "val="<<val->str()<<endl, 1, CPDebugLevel)
+  // CombinedValueObjectPtr indexUnion = boost::dynamic_pointer_cast<CombinedValueObject>(val);
+  // assert(indexUnion);
+  // const std::list<ValueObjectPtr>& indexVals = indexUnion->getValues();
+  // assert(indexVals.size()==1);
+  // CPValueObjectPtr index = boost::dynamic_pointer_cast<CPValueObject>(*indexVals.begin());
+  // assert(index);
+  // SIGHT_VERB(dbg << "index="<<index->str()<<endl, 1, CPDebugLevel)
 
-  // Compute the offset into the region of the core MemLoc that results from the arraypntr reference expression
-  CPValueLatticePtr offset = core->getCPIndex()->ground->op(paRef, index->ground);
-  SIGHT_VERB(dbg << "offset="<<offset->str()<<endl, 1, CPDebugLevel)
+  // // Compute the offset into the region of the core MemLoc that results from the arraypntr reference expression
+  // CPValueLatticePtr offset = core->getCPIndex()->ground->op(paRef, index->ground);
+  // SIGHT_VERB(dbg << "offset="<<offset->str()<<endl, 1, CPDebugLevel)
 
-  CPMemLocObjectPtr paRefML = boost::make_shared<CPMemLocObject>(core->getRegion(), offset->createValueObject(), paRef, parts.NodeState()->inEdgeFromAny(), analysis);
-  SIGHT_VERB(dbg << "paRefML="<<(paRefML? paRefML->str(): "NULL")<<endl, 1, CPDebugLevel)
-  //cl2ml->insert(cl, paRefML);
-  state.addFact(analysis, 0, new CPMemLocObjectNodeFact(paRefML));
+  // CPMemLocObjectPtr paRefML = boost::make_shared<CPMemLocObject>(core->getRegion(), offset->createValueObject(), paRef, parts.NodeState()->inEdgeFromAny(), analysis);
+  // SIGHT_VERB(dbg << "paRefML="<<(paRefML? paRefML->str(): "NULL")<<endl, 1, CPDebugLevel)
+  // //cl2ml->insert(cl, paRefML);
+  // state.addFact(analysis, 0, new CPMemLocObjectNodeFact(paRefML));
 }
 
 void ConstantPropagationAnalysisTransfer::visit(SgBinaryOp *sgn) {
@@ -1382,7 +1382,8 @@ MemLocObjectPtr ConstantPropagationAnalysis::Expr2MemLoc(SgNode* n, PartEdgePtr 
   //struct timeval gopeStart, gopeEnd; gettimeofday(&gopeStart, NULL);
 
   AnalysisPartEdges pedges = NodeState2All(pedge);
-
+  assert(false);
+  
   // SgInitializedNames denote entities that are lexically known and thus do not require
   // any special handling by ConstantPropagation Analysis
   //if(isSgInitializedName(n) || isSgVarRefExp(n)) {
@@ -1439,14 +1440,14 @@ MemLocObjectPtr ConstantPropagationAnalysis::Expr2MemLoc(SgNode* n, PartEdgePtr 
 
     // Get the memory location at the current edge
     CPMemLocObjectPtr ml = boost::dynamic_pointer_cast<CPMemLocObject>(cl2ml->get(cl));*/
-    NodeFact* mlFact = state->getFact(this, 0);
-    assert(mlFact);
-    dbg << "mlFact="<<mlFact->str()<<endl;
-    CPMemLocObjectNodeFact* cpmlFact = dynamic_cast<CPMemLocObjectNodeFact*>(mlFact);
-    assert(cpmlFact);
-    CPMemLocObjectPtr ml = cpmlFact->ml;
-    assert(ml);
-    SIGHT_VERB(dbg << "ml="<<ml->str()<<endl, 1, CPDebugLevel)
+    // NodeFact* mlFact = state->getFact(this, 0);
+    // assert(mlFact);
+    // dbg << "mlFact="<<mlFact->str()<<endl;
+    // CPMemLocObjectNodeFact* cpmlFact = dynamic_cast<CPMemLocObjectNodeFact*>(mlFact);
+    // assert(cpmlFact);
+    // CPMemLocObjectPtr ml = cpmlFact->ml;
+    // assert(ml);
+    // SIGHT_VERB(dbg << "ml="<<ml->str()<<endl, 1, CPDebugLevel)
 
     //gettimeofday(&gopeEnd, NULL); cout << "            ConstantPropagationAnalysis::Expr2MemLoc getFact\t"<<(((gopeEnd.tv_sec*1000000 + gopeEnd.tv_usec) - (gopeStart.tv_sec*1000000 + gopeStart.tv_usec)) / 1000000.0)<<endl;
 
@@ -1455,7 +1456,7 @@ MemLocObjectPtr ConstantPropagationAnalysis::Expr2MemLoc(SgNode* n, PartEdgePtr 
     gettimeofday(&copyEnd, NULL); cout << "ConstantPropagationAnalysis::Expr2MemLoc copyAOType\t"<<(((copyEnd.tv_sec*1000000 + copyEnd.tv_usec) - (copyStart.tv_sec*1000000 + copyStart.tv_usec)) / 1000000.0)<<endl;
 
     return mlCp;*/
-    return ml->copyAOType();
+    // return ml->copyAOType();
   // If the target of this edge is a wildcard
   } else if(pedges.NodeState()->source()) {
     // Get the NodeState at the source of this edge
@@ -1480,19 +1481,19 @@ MemLocObjectPtr ConstantPropagationAnalysis::Expr2MemLoc(SgNode* n, PartEdgePtr 
 
       // Get the memory location at the current edge
       CPMemLocObjectPtr ml = boost::dynamic_pointer_cast<CPMemLocObject>(cl2ml->get(cl));*/
-      NodeFact* mlFact = state->getFact(this, 0);
-      CPMemLocObjectNodeFact* cpmlFact = dynamic_cast<CPMemLocObjectNodeFact*>(mlFact);
-      assert(cpmlFact);
-      CPMemLocObjectPtr ml = cpmlFact->ml;
-      assert(ml);
-      SIGHT_VERB(dbg << "ml="<<ml->str()<<endl, 1, CPDebugLevel)
+      // NodeFact* mlFact = state->getFact(this, 0);
+      // CPMemLocObjectNodeFact* cpmlFact = dynamic_cast<CPMemLocObjectNodeFact*>(mlFact);
+      // assert(cpmlFact);
+      // CPMemLocObjectPtr ml = cpmlFact->ml;
+      // assert(ml);
+      // SIGHT_VERB(dbg << "ml="<<ml->str()<<endl, 1, CPDebugLevel)
 
-      if(lats==e2lats.begin())
-        mergedML = boost::dynamic_pointer_cast<CPMemLocObject>(ml->copyAOType());
-      else
-        mergedML->meetUpdate((MemLocObjectPtr)ml, indexEdge, getComposer(), this);
+      // if(lats==e2lats.begin())
+      //   mergedML = boost::dynamic_pointer_cast<CPMemLocObject>(ml->copyAOType());
+      // else
+      //   mergedML->meetUpdate((MemLocObjectPtr)ml, indexEdge, getComposer(), this);
 
-      SIGHT_VERB(dbg << "mergedML="<<mergedML->str()<<endl, 1, CPDebugLevel)
+      // SIGHT_VERB(dbg << "mergedML="<<mergedML->str()<<endl, 1, CPDebugLevel)
     }
     return mergedML;
   // If the source of this edge is a wildcard

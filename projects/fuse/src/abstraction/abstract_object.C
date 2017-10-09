@@ -2968,7 +2968,7 @@ bool MemRegionObject::mustEqual(MemRegionObjectPtr that, PartEdgePtr pedge,
 bool MemRegionObject::mayEqual(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -2988,7 +2988,7 @@ bool MemRegionObject::mayEqual(AbstractObjectPtr that, PartEdgePtr pedge,
 bool MemRegionObject::mustEqual(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3020,7 +3020,7 @@ bool MemRegionObject::subSet(MemRegionObjectPtr that, PartEdgePtr pedge,
 bool MemRegionObject::equalSet(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3039,7 +3039,7 @@ bool MemRegionObject::equalSet(AbstractObjectPtr that, PartEdgePtr pedge,
 bool MemRegionObject::subSet(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3074,7 +3074,7 @@ bool MemRegionObject::meetUpdate(MemRegionObjectPtr that, PartEdgePtr pedge,
 bool MemRegionObject::meetUpdate(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return false;
     case FuncResultUnequal: return setToFull(pedge, comp, analysis);
@@ -3397,7 +3397,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemRegionObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType>::mustEqual
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3416,7 +3416,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemRegionObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType>::equalSet
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3436,7 +3436,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemRegionObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType>::subSet
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3457,7 +3457,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemRegionObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType>::meetUpdate
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemRegionObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return false;
     case FuncResultUnequal: return this->setToFull(pedge, comp, analysis);
@@ -3716,7 +3716,7 @@ bool MemLocObject::mayEqual(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
 
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3738,7 +3738,7 @@ bool MemLocObject::mayEqual(AbstractObjectPtr that, PartEdgePtr pedge,
 bool MemLocObject::mustEqual(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3826,7 +3826,7 @@ bool MemLocObject::subSet(MemLocObjectPtr that, PartEdgePtr pedge,
 bool MemLocObject::equalSet(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3847,7 +3847,7 @@ bool MemLocObject::equalSet(AbstractObjectPtr that, PartEdgePtr pedge,
 bool MemLocObject::subSet(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -3898,7 +3898,7 @@ bool MemLocObject::meetUpdate(MemLocObjectPtr that, PartEdgePtr pedge,
 bool MemLocObject::meetUpdate(AbstractObjectPtr that, PartEdgePtr pedge,
     Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return false;
     case FuncResultUnequal: return setToFull(pedge, comp, analysis);
@@ -4157,7 +4157,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemLocObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType, MappedAOMemRegionType>::mayEqual
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -4176,7 +4176,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemLocObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType, MappedAOMemRegionType>::mustEqual
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -4195,7 +4195,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemLocObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType, MappedAOMemRegionType>::equalSet
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -4215,7 +4215,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemLocObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType, MappedAOMemRegionType>::subSet
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return true;
     case FuncResultUnequal: return false;
@@ -4236,7 +4236,7 @@ template<class Key, bool KeyIsComposedAnalysis, class MappedAOSubType, class Map
 bool MappedMemLocObject<Key, KeyIsComposedAnalysis, MappedAOSubType, MappedAOValueType, MappedAOMemRegionType>::meetUpdate
                   (AbstractObjectPtr that, PartEdgePtr pedge,Composer* comp, ComposedAnalysis* analysis) {
   // Identical FuncResultMemLocObject denote the same set and different ones denote disjoint sets
-  FuncResultRelationType rel = getFuncResultRel(this, that, pedge);
+  FuncResultRelationType rel = this->getFuncResultRel(this, that, pedge);
   switch(rel) {
     case FuncResultSameFunc: return false;
     case FuncResultUnequal: return this->setToFull(pedge, comp, analysis);

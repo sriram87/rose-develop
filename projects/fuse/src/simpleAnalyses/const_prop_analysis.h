@@ -347,7 +347,7 @@ class ConstantPropagationAnalysis : virtual public FWDataflow
 
   boost::shared_ptr<MemLocObject> Expr2MemLoc(SgNode* n, PartEdgePtr pedge);
   bool implementsExpr2MemLoc() { return false; }
-  implTightness Expr2MemLocTightness() { return ComposedAnalysis::tight; }
+  implTightness Expr2MemLocTightness() { return ComposedAnalysis::loose; }
 
   // pretty print for the object
   std::string str(std::string indent="") const

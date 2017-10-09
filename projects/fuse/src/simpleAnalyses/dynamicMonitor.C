@@ -90,7 +90,7 @@ SgCommaOpExp * insertFuncCallAfterUsingCommaOp(list<string>& funcName,
   ROSE_ASSERT (enclosing_stmt != NULL);
 
   gensym_counter ++;
-  string temp_name = "_t_"+ rose::StringUtility::numberToString(gensym_counter);
+  string temp_name = "_t_"+ Rose::StringUtility::numberToString(gensym_counter);
   SgVariableDeclaration* t_decl = buildVariableDeclaration(temp_name, t, NULL, enclosing_stmt->get_scope());
   insertStatementBefore (enclosing_stmt, t_decl);
   SgVariableSymbol * temp_sym = getFirstVarSym (t_decl);

@@ -6,6 +6,7 @@
 #include "pointsToAnalysis.h"
 #include <boost/xpressive/xpressive.hpp>
 #include "fuseCommandParser.h"
+#include "const_prop_count.h"
 
 using namespace sight;
 using namespace std;
@@ -83,9 +84,11 @@ namespace fuse {
     pointsto = icase("pt");
     callcontext = icase("ccs");
     deadpath = icase("dp");
+    constcount = icase("co");
     seqcomp = icase("seq");
     tightcomp = icase("tight");
     analysis = by_ref(constprop)
+      | by_ref(constcount)
       | by_ref(pointsto) 
       | by_ref(deadpath)
       | by_ref(callcontext);
@@ -117,6 +120,9 @@ namespace fuse {
     }
     else if(regex_match(analysis_s, callcontext)) {
       cc.push_back(new CallContextSensitivityAnalysis(1, CallContextSensitivityAnalysis::callSite, false));
+    }
+    else if(regex_match(analysis_s, constcount)) {
+      cc.push_back(new ConstPropCountAnalysis());
     }
     else {
       ostringstream oss;
@@ -260,6 +266,7 @@ namespace fuse {
     }
     catch(MatchException& e) {
       cerr << e.what() << endl;
+      return NULL;
     }
   }
 }// end namespace

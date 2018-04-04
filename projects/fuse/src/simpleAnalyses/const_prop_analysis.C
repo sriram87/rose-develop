@@ -1279,6 +1279,7 @@ ValueObjectPtr ConstantPropagationAnalysis::Expr2Val(SgNode* n, PartEdgePtr pedg
   if(pedges.NodeState()->source() && pedges.NodeState()->target()) {
     // Get the NodeState at the source of this edge
     NodeState* state = NodeState::getNodeState(this, (useSSA? NULLPart: pedges.NodeState()->source()));
+    cout << "state="<<state->str(this)<<endl;
     SIGHT_VERB(dbg << "state="<<state->str(this)<<endl, 1, CPDebugLevel)
 
     // Get the value map at the current edge
@@ -1307,6 +1308,7 @@ ValueObjectPtr ConstantPropagationAnalysis::Expr2Val(SgNode* n, PartEdgePtr pedg
     // Return the lattice associated with n's expression
     CPValueLatticePtr val = boost::dynamic_pointer_cast<CPValueLattice>(cpMap->get(ml));
     assert(val);
+    cout << val->str() << endl;
     SIGHT_VERB(dbg << "val="<<val->str()<<endl, 1, CPDebugLevel)
 
     return val->copyCPLat()->createValueObject();
@@ -1315,6 +1317,7 @@ ValueObjectPtr ConstantPropagationAnalysis::Expr2Val(SgNode* n, PartEdgePtr pedg
     // Get the NodeState at the source of this edge
     NodeState* state = NodeState::getNodeState(this, pedges.NodeState()->source());
     //dbg << "state="<<state->str(this)<<endl;
+    cout << "state="<<state->str(this)<<endl;
 
     map<PartEdgePtr, vector<Lattice*> >& e2lats = state->getLatticeBelowAllMod(this);
     assert(e2lats.size()>=1);
@@ -1341,6 +1344,7 @@ ValueObjectPtr ConstantPropagationAnalysis::Expr2Val(SgNode* n, PartEdgePtr pedg
 
       CPValueLatticePtr val = boost::dynamic_pointer_cast<CPValueLattice> (boost::dynamic_pointer_cast<ValueObject>(cpMap->get(ml)));
       SIGHT_VERB(dbg << "val="<<val->str()<<endl, 1, CPDebugLevel)
+      cout << val->str() << endl;
 
       if(lats==e2lats.begin())
         mergedLat = val->copyCPLat();
@@ -1368,6 +1372,7 @@ ValueObjectPtr ConstantPropagationAnalysis::Expr2Val(SgNode* n, PartEdgePtr pedg
 
     // Return the lattice associated with n's expression since that is likely to be more precise
     CPValueLatticePtr val = boost::dynamic_pointer_cast<CPValueLattice>(cpMap->get(ml));
+    cout << val->str() << endl;
     assert(val);
     SIGHT_VERB(dbg << "val="<<val->str()<<endl, 1, CPDebugLevel)
 

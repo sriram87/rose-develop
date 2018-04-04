@@ -727,7 +727,7 @@ void dataflowGraphEdgeIterator<GraphEdgePtr, GraphNodePtr>::add_internal(GraphEd
 {
   // Never add a terminator state
   if(terminators.find(this->PartEdge2DirPart(next)) != terminators.end()) return;
-
+  
   graphEdgeIterator<GraphEdgePtr, GraphNodePtr>::add_internal(next);
 }
 

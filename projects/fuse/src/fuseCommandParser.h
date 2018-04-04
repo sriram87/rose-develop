@@ -61,7 +61,8 @@ namespace fuse {
     // 1. add a new sregex
     // 2. initialize it under FuseCommandParser and also modify analysis regex
     // 3. add the analysis creation in matchAnalysisToken
-    boost::xpressive::sregex constprop, 
+    boost::xpressive::sregex constprop,
+      constcount,
       callcontext,
       deadpath, 
       pointsto,

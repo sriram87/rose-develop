@@ -2,6 +2,7 @@
 #include "compose.h"
 #include "fuseCommandParser.h"
 #include "const_prop_analysis.h"
+#include "const_prop_count.h"
 #include "dead_path_elim_analysis.h"
 #include "tight_composer.h"
 #include "call_context_sensitivity_analysis.h"
@@ -73,11 +74,17 @@ int main(int argc, char* argv[])
   cmd->execute();
 
   list<ComposedAnalysis*> sanalyses = cmd->getSubAnalysisList();
+  list<ComposedAnalysis*>::const_iterator s = sanalyses.begin();
+  for( ; s != sanalyses.end(); ++s) {
+    if(ConstPropCountAnalysis* cpc = dynamic_cast<ConstPropCountAnalysis*>(*s)) {
+      cpc->print_stats();
+    }
+  }
 
-  FuseAnnotTraversal fuseannotations(sanalyses);
-  fuseannotations.traverseInputFiles(project, preorder);
-  fuseannotations.printConstantCountMapStats();
-  fuseannotations.printAssignOpConstantFirstAnalysisCount();
+  // FuseAnnotTraversal fuseannotations(sanalyses);
+  // fuseannotations.traverseInputFiles(project, preorder);
+  // fuseannotations.printConstantCountMapStats();
+  // fuseannotations.printAssignOpConstantFirstAnalysisCount();
 
   cout << "==========  E  N  D  ==========\n";
   return 0;

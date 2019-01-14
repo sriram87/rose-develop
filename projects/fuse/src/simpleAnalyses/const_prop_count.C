@@ -10,7 +10,12 @@
 using namespace std;
 
 namespace fuse {
-  ConstPropCountAnalysis::ConstPropCountAnalysis() :FWDataflow(false, false), m_assignExpCount(0) { }
+  ConstPropCountAnalysis::ConstPropCountAnalysis() :FWDataflow(false, false),
+						    m_assignExpCount(0),
+						    m_unassignExpCount(0),
+						    m_knownCondCount(0),
+						    m_unknownCondCount(0),
+						    m_edges(0) { }
 
   ComposedAnalysisPtr ConstPropCountAnalysis::copy() {
     return boost::make_shared<ConstPropCountAnalysis>(*this);
@@ -31,27 +36,193 @@ namespace fuse {
   }
   
   bool ConstPropCountAnalysis::transfer(AnalysisParts& parts, CFGNode cn, NodeState& state, std::map<PartEdgePtr, std::vector<Lattice*> >& dfInfo) {
+    m_edges++;
     set<CFGNode> nodes = parts.NodeState()->CFGNodes();
-    for(set<CFGNode>::iterator n=nodes.begin(); n!=nodes.end(); n++) {
-      if(SgAssignOp* assignOp = isSgAssignOp(n->getNode())) {
-	ValueObjectPtr v = getComposer()->OperandExpr2Val(assignOp, assignOp->get_lhs_operand(), parts.NodeState()->inEdgeFromAny(), this);
-	cout << v->str() << endl;
-	if(v->isConcrete()) {
-	  m_assignExpCount++;
+      for(set<CFGNode>::iterator n=nodes.begin(); n!=nodes.end(); n++) {
+	// if visiting for first time
+	// collect statistics only once
+	SgAssignOp* assignOp = isSgAssignOp(n->getNode());
+	if(assignOp && m_visited.find(assignOp) == m_visited.end()) {
+	  m_visited.insert(assignOp);
+	  // std::cout << assignOp << SgNode2Str(assignOp) << std::endl;
+	  ValueObjectPtr v = getComposer()->OperandExpr2Val(assignOp, assignOp, parts.NodeState()->outEdgeToAny(), this);
+	  // cout << v->str() << endl;
+	  if(v->isConcrete()) {
+	    m_assignExpCount++;
+	  }
+	  else {
+	    m_unassignExpCount++;
+	  }
+	}
+	else if(SgIfStmt* ifstmt = isSgIfStmt(n->getNode())) {
+	  SgExprStatement* exprStmt = isSgExprStatement(ifstmt->get_conditional());
+	  if(exprStmt) {
+	    SgExpression* expr = exprStmt->get_expression();
+	    ValueObjectPtr v = getComposer()->OperandExpr2Val(expr, expr, parts.NodeState()->outEdgeToAny(), this);
+	    if(v->isConcrete()) {
+	      m_knownCondCount++;
+	    }
+	    else {
+	      m_unknownCondCount++;
+	    }
+	  }
+	  else {
+	    cerr << "Warning: SgIfStmt()->get_conditional() != SgExprStatement\n";
+	  }
 	}
       }
-    }
     PartEdgePtr accessEdge = parts.index()->inEdgeFromAny();
     return dynamic_cast<BoolAndLattice*>(dfInfo[accessEdge][0])->set(true);
   }
 
   void ConstPropCountAnalysis::print_stats() {
     cout << "m_assignExpCount=" << m_assignExpCount << endl;
+    cout << "m_unassignExpCount=" << m_unassignExpCount << endl;
+    cout << "m_knownCondCount=" << m_knownCondCount << endl;
+    cout << "m_unknownCondCount=" << m_unknownCondCount << endl;
+    cout << "edges=" << m_edges << endl;
   }
 
   string ConstPropCountAnalysis::str(string indent) {
     return "ConstPropCountAnalysis";
   }
-    
-}                                         
 
+  /********************
+   * ATS2DotGenerator *
+   ********************/
+  ATS2DotGenerator::ATS2DotGenerator(ComposedAnalysis* analysis_) : analysis(analysis_) { }
+
+  std::string ATS2DotGenerator::cfgn2label(CFGNode cfgn) {
+    ostringstream oss;
+    string node_s;
+    SgNode* sgn = cfgn.getNode();
+    // node_s = SageInterface::get_name(sgn);
+    node_s = CFGNode2Str(cfgn);
+    if(node_s.length() > 20) {
+      node_s.resize(20); node_s += "...";
+    }
+    oss << node_s << "\n<" << sgn->class_name() << "> "
+        << " line:" << sgn->get_startOfConstruct()->get_line();
+    return oss.str();
+  }
+
+  string ATS2DotGenerator::part2label(PartPtr part) {
+    set<CFGNode> cfgnset = part->CFGNodes();
+    ostringstream oss;
+    set<CFGNode>::iterator ci = cfgnset.begin();
+    for( ; ci != cfgnset.end(); ) {      
+      oss << cfgn2label(*ci);
+      ++ci;
+      if(ci != cfgnset.end()) oss << ", ";      
+    }
+    return oss.str();
+  }
+
+  
+  string ATS2DotGenerator::newcontext2str() {
+    ostringstream oss;
+    oss << "cc" << contextid++;
+    return oss.str();
+  }
+
+  string ATS2DotGenerator::context2dotid(PartContextPtr pcontext) {
+    map<PartContextPtr, string>::const_iterator f = context2strMap.find(pcontext);
+    if(f == context2strMap.end()) {
+      string ctx2str = newcontext2str();
+      context2strMap[pcontext] = ctx2str;
+    }
+    return context2strMap[pcontext];
+  }
+
+  string ATS2DotGenerator::part2dotid(PartPtr part) {
+    set<CFGNode> cfgnset = part->CFGNodes();
+    assert(cfgnset.size() == 1);
+    CFGNode cn = *cfgnset.begin();
+
+    ostringstream oss;    
+    oss << cn.id() << context2dotid(part->getPartContext());
+    string id = oss.str();
+
+    // Sanity checks
+    std::replace(id.begin(), id.end(), ' ', '_');
+    std::replace(id.begin(), id.end(), ':', '_');
+
+    return id;
+  }
+  
+  string ATS2DotGenerator::part2dot(PartPtr part) {
+    ostringstream oss;
+    string nodeColor = "black";
+    if (part->mustSgNodeAll<SgStatement>()) nodeColor = "blue";   
+    else if (part->mustSgNodeAll<SgExpression>()) nodeColor = "darkgreen";
+    else if (part->mustSgNodeAll<SgInitializedName>()) nodeColor = "brown";
+    // First write the id
+    oss << part2dotid(part) << " ";
+    // Write the attributes
+    oss << "[label=\"" << escapeString(part2label(part)) << "\""
+        << ", color=" << nodeColor << "];\n";
+    return oss.str();
+  }
+
+  string ATS2DotGenerator::partedge2dot(PartEdgePtr pedge) {
+    ostringstream oss;
+    PartPtr s = pedge->source();
+    PartPtr t = pedge->target();
+    // First write the dot edge
+    oss << part2dotid(s) << " -> " << part2dotid(t);
+    oss << " [color=\"black\"];" << endl;
+    return oss.str();
+  }
+
+  
+  void ATS2DotGenerator::generateDot() {
+    Composer* composer = analysis->getComposer();
+    set<PartPtr> initial = composer->GetStartAStates(analysis);
+    fw_dataflowGraphEdgeIterator<PartEdgePtr, PartPtr> ei(/* not working on incremental graph */
+							  false,
+							  selectIterOrderFromEnvironment());
+
+    set<PartPtr>::iterator ip = initial.begin();
+    for( ; ip != initial.end(); ++ip) {
+      ei.addStart(*ip);
+    }
+
+    nodess.clear(); edgess.clear();
+
+    nodess << "\n subgraph cluster {\n";
+    string indent = "    ";
+
+    while(!ei.isEnd()) {
+      PartPtr part = ei.getPart();
+      // Write the node
+      nodess << indent << part2dot(part);
+
+      // Write the edges
+      list<PartEdgePtr> oedges = part->outEdges();
+      list<PartEdgePtr>::iterator oe = oedges.begin();
+      for( ; oe != oedges.end(); ++oe) {
+        edgess << indent << partedge2dot(*oe);               
+      }
+
+      ei.pushAllDescendants();      
+      ei++;
+    }
+    nodess << indent << "}" << endl;
+  }
+
+  void ATS2DotGenerator::generateDotFile(int instance) {
+    ofstream file;
+    SgProject* project = SageInterface::getProject();
+    SgFile* sgfile = project->get_files()[0]; assert(sgfile);
+    ostringstream namess;
+    namess << Rose::StringUtility::stripPathFromFileName(sgfile->getFileName()) << "-ats-" << instance << ".dot";
+    string filename = namess.str();
+    file.open(filename.c_str());
+    file << "digraph G {" << endl;
+    file << nodess.str();
+    file << edgess.str() << endl;
+    file << "}";
+    file.close();
+  }
+
+} // end namespace

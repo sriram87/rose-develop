@@ -25,6 +25,7 @@ namespace fuse {
     std::list<ComposedAnalysis*> getSubAnalysisList() const;
     void initFuseCommand();
     ComposedAnalysis* getFuseCommand();
+    Composer* getRootComposer();
     void execute();
     std::string str() const;
     ~FuseCommand();

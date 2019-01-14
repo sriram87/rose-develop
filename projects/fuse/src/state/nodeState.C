@@ -694,6 +694,11 @@ void NodeState::deleteState(Analysis* analysis)
 // ====== STATIC ======
 map<ComposedAnalysis*, map<PartPtr, NodeState*> > NodeState::nodeStateMap;
 
+map<PartPtr, NodeState*> NodeState::getNodeStateMap(ComposedAnalysis* analysis) {
+  if(nodeStateMap.find(analysis) != nodeStateMap.end()) return nodeStateMap[analysis];
+  else assert(false);
+}
+
 // Returns the NodeState object associated with the given Part from the given analysis.
 NodeState* NodeState::getNodeState(ComposedAnalysis* analysis, PartPtr p)
 {

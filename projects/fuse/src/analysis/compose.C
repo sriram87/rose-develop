@@ -2,12 +2,14 @@
 #include "compose.h"
 #include "ssa.h"
 #include "const_prop_analysis.h"
+#include "dead_path_elim_analysis.h"
 #include <boost/enable_shared_from_this.hpp>
 //#include "printAnalysisStates.h"
 #include "saveDotAnalysis.h"
 #include "stx_analysis.h"
 #include "sight.h"
 #include <set>
+#include <queue>
 
 using namespace std;
 using namespace sight;
@@ -1369,6 +1371,9 @@ void ChainComposer::runAnalysis()
     queryInfo[currentAnalysis] = CCQueryServers(doneAnalyses.back());
   }
 
+  // memory cleanup of prior CP and DP
+  std::queue<ComposedAnalysis*> doneCPDP;
+
   int i=1;
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++, i++) {
     //list<string> contextAttrs;
@@ -1427,8 +1432,25 @@ void ChainComposer::runAnalysis()
       up_paa.runAnalysis();
     }*/
 
+    ConstantPropagationAnalysis* cp = dynamic_cast<ConstantPropagationAnalysis*>(currentAnalysis);
+    DeadPathElimAnalysis* dp = dynamic_cast<DeadPathElimAnalysis*>(currentAnalysis);
+    if(dp || cp) {
+      doneCPDP.push(currentAnalysis);
+    }
+
     // Record that we've completed the given analysis
     doneAnalyses.push_back(*a);
+
+    if(doneCPDP.size() > 2) {
+      ComposedAnalysis* priorCPorDP = doneCPDP.front();
+      doneCPDP.pop();
+      map<PartPtr, NodeState*> stateMap = NodeState::getNodeStateMap(priorCPorDP);
+      std::cout << "analysis=" << priorCPorDP << ", stateMap=" << &stateMap << ", size=" << stateMap.size() << endl;
+      map<PartPtr, NodeState*>::iterator strt, end;
+      strt = stateMap.begin();
+      end = stateMap.end();
+      stateMap.erase(strt, end);
+    }
 
     currentAnalysis = NULL;
   }

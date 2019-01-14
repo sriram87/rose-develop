@@ -51,6 +51,11 @@ namespace fuse {
     return root;   
   }
 
+  Composer* FuseCommand::getRootComposer() {
+    assert((Composer*) root);
+    return ((Composer*) root);
+  }
+
   void FuseCommand::execute() {
     assert(root);
     ((ChainComposer*) root)->runAnalysis();

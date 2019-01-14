@@ -115,7 +115,7 @@ fuseLayout_SOURCES = \
 ########
 # FUSE #
 ########
-fuse_CXXFLAGS = $(SIGHT_CFLAGS) -DROSE_PREFIX="\"${top_builddir}\""
+fuse_CXXFLAGS = -g -O0 $(SIGHT_CFLAGS) -DROSE_PREFIX="\"${top_builddir}\""
 fuse_LDADD = -lrose
 fuse_LDFLAGS = $(ROSE_LIBS) $(LIBS_WITH_RPATH) $(SIGHT_LINKFLAGS)
 

@@ -273,6 +273,7 @@ class NodeState
   public:
   // Returns the NodeState object associated with the given Part from the given analysis.
   static NodeState* getNodeState(ComposedAnalysis* analysis, PartPtr p);
+  static std::map<PartPtr, NodeState*> getNodeStateMap(ComposedAnalysis* analysis);
 
   public:
 

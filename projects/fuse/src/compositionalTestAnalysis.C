@@ -12,6 +12,7 @@
 #include <exception>
 #include "sight.h"
 #include "AnalysisAstAttribute.h"
+#include "saveDotAnalysis.h"
 
 
 using namespace std;
@@ -72,15 +73,20 @@ int main(int argc, char* argv[])
   FuseCommand* cmd = parser(cmd_s);
   cmd->initFuseCommand();
   cmd->execute();
-
   list<ComposedAnalysis*> sanalyses = cmd->getSubAnalysisList();
   list<ComposedAnalysis*>::const_iterator s = sanalyses.begin();
-  for( ; s != sanalyses.end(); ++s) {
+  ComposedAnalysis* last = sanalyses.back();
+  for(int count=0; s != sanalyses.end(); ++s) {
     if(ConstPropCountAnalysis* cpc = dynamic_cast<ConstPropCountAnalysis*>(*s)) {
+      count++;
       cpc->print_stats();
+      // ATS2DotGenerator ats2dot(*s);
+      // ats2dot.generateDot();
+      // ats2dot.generateDotFile(count);
     }
-  }
-
+ }
+  
+  
   // FuseAnnotTraversal fuseannotations(sanalyses);
   // fuseannotations.traverseInputFiles(project, preorder);
   // fuseannotations.printConstantCountMapStats();

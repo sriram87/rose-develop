@@ -1,8 +1,9 @@
-#include "concrete_values.h"
-
 #include "sage3basic.h"
-#include "const_prop_analysis.h"
 
+using namespace std;
+
+#include "concrete_values.h"
+#include "const_prop_analysis.h"
 #include <boost/bind.hpp>
 #include <boost/mem_fn.hpp>
 #include <boost/make_shared.hpp>
@@ -10,16 +11,15 @@
 #include <boost/lambda/casts.hpp>
 #include "sageInterface.h"
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
+
 using namespace SageInterface;
 
 #include <cwchar>
 
 #define ConcreteDebugLevel 0
-#if ConcreteDebugDevel==0
-  #define DISABLE_SIGHT
-#endif
 
 // Define type conversions for lambda operators that are not supported by Boost::Lambda
 namespace boost {
@@ -2008,7 +2008,9 @@ ConcreteValueKindPtr ConcreteExactKind::op(SgBinaryOp* op, ConcreteValueKindPtr 
       // This should be handled inside ConcreteMemLocObjects
       assert(0);
     } else if(isSgPntrArrRefExp(op)) {
+#ifndef DISABLE_SIGHT
       scope s("SgPntrArrRefExp");
+#endif
       assert(thatConcrete);
       // Get the offset of the SgPntrArrRefExp relative to the starting point of its parent expression
       long long nextOffset = getPntrArrRefOffset(isSgPntrArrRefExp(op), thatConcrete);

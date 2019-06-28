@@ -370,7 +370,9 @@ namespace fuse {
                                // Set of all the Parts that have been initialized
                                std::set<PartPtr>& initialized,
                                // The dataflow iterator that identifies the state of the iteration
-                               dataflowPartEdgeIterator* curNodeIt,
+                               dataflowPartEdgeIterator* curNodeIt
+#ifndef DISABLE_SIGHT
+                               ,
                                // anchor that denotes the current abstract state in the debug output
                                anchor curPartAnchor,
                                // graph widget that visualizes the flow of the worklist algorithm
@@ -378,7 +380,9 @@ namespace fuse {
                                // Maps each Abstract State to the anchors of outgoing links that target it from the last visit to its predecessors
                                std::map<PartPtr, std::set<anchor> >& toAnchors,
                                // Maps each Abstract state to the anchors of the AStates that lead to it, as well as the AStates themselves
-                               std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors);
+                               std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                               );
 
 
     void transferAStateDense(AnalysisParts& parts,
@@ -386,14 +390,24 @@ namespace fuse {
                              std::set<PartPtr>& initialized, dataflowPartEdgeIterator* curNodeIt,
                              map<PartEdgePtr, vector<Lattice*> >& dfInfoPost,
                              //set<PartPtr>& ultimateParts, set<PartPtr>& ultimateSupersetParts,
-                             AnalysisPartSets& ultimateParts,
+                             AnalysisPartSets& ultimateParts
+#ifndef DISABLE_SIGHT
+                             ,
                              anchor curPartAnchor,
                              sight::structure::graph& worklistGraph,std::map<PartPtr, std::set<anchor> >& toAnchors,
-                             std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors);
+                             std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                             );
+    
     void transferPropagateAStateSSA(PartPtr part, std::set<PartPtr>& visited, bool firstVisit,
-                                     std::set<PartPtr>& initialized, dataflowPartEdgeIterator* curNodeIt, anchor curPartAnchor,
-                                     sight::structure::graph& worklistGraph,std::map<PartPtr, std::set<anchor> >& toAnchors,
-                                     std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors);
+                                    std::set<PartPtr>& initialized, dataflowPartEdgeIterator* curNodeIt
+#ifndef DISABLE_SIGHT
+                                    ,
+                                    anchor curPartAnchor,
+                                    sight::structure::graph& worklistGraph,std::map<PartPtr, std::set<anchor> >& toAnchors,
+                                    std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                                    );
 
     // Invokes the analysis-specific method to set the ATS location PartEdges of all the newly-computed
     // Lattices at part

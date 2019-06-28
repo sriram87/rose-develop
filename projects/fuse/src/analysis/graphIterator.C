@@ -1,16 +1,19 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "graphIterator.h"
 #include <boost/make_shared.hpp>
+
+#ifndef DISABLE_SIGHT
 #include "sight.h"
 using namespace sight;
+#endif
 
 #include <list>
 #include <vector>
 #include <set>
 #include <string>
 #include <iostream>
-
-using namespace std;
 
 namespace fuse {
 
@@ -1272,7 +1275,9 @@ void GETopoOrderIteratorWorklist<GraphEdgePtr, GraphNodePtr>::refreshEdgeIndex(G
          worklist[maxEdgeTopoIdx].insert(edge);
      }
 
+#ifndef DISABLE_SIGHT
      dbg << "Updating edge index from "<<edgeIdx->second<<" to "<<maxEdgeTopoIdx<<", edge="<<edge->str()<<endl;
+#endif
 
      // Record the edge's new index in edge2Idx
      edgeIdx->second = maxEdgeTopoIdx;

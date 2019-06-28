@@ -32,9 +32,15 @@ class debugLevel {
   debugLevel(const char* name, int level) : level(level) {
 /*    static bool sightInitialized=false;
     if(!sightInitialized) { */
+#ifndef DISABLE_SIGHT
     debugAttribute = attr_enter(name, (long)level);
+#endif
   }
-  ~debugLevel() { attr_exit(debugAttribute); }
+  ~debugLevel() {
+#ifndef DISABLE_SIGHT
+    attr_exit(debugAttribute);
+#endif
+  }
   int operator()() const { return level; }
 };
 

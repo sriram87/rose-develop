@@ -1,5 +1,5 @@
 include $(top_srcdir)/config/Makefile.for.ROSE.includes.and.libs
-include $(ROSE_WITH_SIGHT_INSTALL_PATH)/Makefile.extern
+#include $(ROSE_WITH_SIGHT_INSTALL_PATH)/Makefile.extern
 
 bin_PROGRAMS = fuse fuseLayout
 
@@ -9,6 +9,7 @@ INCLUDES = \
 	-I$(srcdir)/abstraction \
 	-I$(srcdir)/cfgUtils \
 	-I$(srcdir)/sight/widgets \
+	-I$(srcdir)/sight/ \
 	-I$(srcdir)/lattice \
 	-I$(srcdir)/simpleAnalyses \
 	-I$(srcdir)/state 
@@ -108,6 +109,7 @@ TEST_EXIT_STATUS = $(top_srcdir)/scripts/test_exit_status
 ###############
 # FUSE LAYOUT #
 ###############
+SIGHT_CFLAGS=-DDISABLE_SIGHT
 fuseLayout_CXXFLAGS = $(SIGHT_CFLAGS)
 fuseLayout_LDFLAGS = $(ROSE_LIBS) $(LIBS_WITH_RPATH) $(SIGHT_LAYOUT_DYNAMIC_LINKFLAGS)
 fuseLayout_SOURCES = \

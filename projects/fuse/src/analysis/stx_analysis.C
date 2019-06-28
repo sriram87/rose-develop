@@ -1,4 +1,6 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "stx_analysis.h"
 #include <map>
 #include <typeinfo>
@@ -12,17 +14,20 @@
 #include <boost/bind.hpp>
 
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#else
+#include "sight-disable.h"
+#endif
+
 using namespace SageBuilder;
 
 //namespace bll = boost::lambda;
 
 namespace fuse {
 
+#ifndef DISABLE_SIGHT
 #define stxAnalysisDebugLevel 0
-#if stxAnalysisDebugDevel==0
-  #define DISABLE_SIGHT
 #endif
 
 /****************************************
@@ -63,6 +68,7 @@ class FuncEntryExitFunctor
       Function func(decl);
       SIGHT_VERB_DECL(scope, ("FuncEntryExitFunctor", scope::medium), 2, stxAnalysisDebugLevel)
 
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_IF(2, stxAnalysisDebugLevel)
         dbg << "Func "<<func.get_name().getString()<<endl;
         dbg << "Type = "<<SgNode2Str(decl->get_type())<<endl;
@@ -74,6 +80,7 @@ class FuncEntryExitFunctor
         else
           dbg << "Has not defining Declaration: def="<<isSgFunctionDeclaration(decl->get_firstNondefiningDeclaration())->get_definition()<<endl;*/
       SIGHT_VERB_FI()
+#endif
 
       if(// This is not a declaration defined in a templated class
          // According to rose/src/backend/unparser/languageIndependenceSupport/modified_sage.C:1308
@@ -100,6 +107,7 @@ class FuncEntryExitFunctor
           def->set_parent(decl);
           def->set_file_info(decl->get_file_info());
           Exit = CFGNode(def, 3);
+#ifndef DISABLE_SIGHT
           SIGHT_VERB_IF(2, stxAnalysisDebugLevel)
             dbg << "Creating function "<<func.get_name().getString()<<endl;
             dbg << "decl="<<decl<<"="<<SgNode2Str(decl)<<endl;
@@ -113,6 +121,7 @@ class FuncEntryExitFunctor
               dbg << "it="<<CFGNode2Str(*it)<<endl;
             }
           SIGHT_VERB_FI()
+#endif
         // If this function has a definition
         } else {
           // The function's exit CFGNode
@@ -156,6 +165,7 @@ void initFuncEntryExit() {
     NodeQuery::querySubTree(SageInterface::getProject(), FuncEntryExitFunctor());
     FuncEntryExit_initialized=true;
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(3, stxAnalysisDebugLevel)
       scope reg("", scope::medium);
       for(map<Function, CFGNode>::iterator i=Func2Entry.begin(); i!=Func2Entry.end(); i++) {
@@ -164,6 +174,7 @@ void initFuncEntryExit() {
         dbg << " exit: "<< CFGNode2Str(Func2Exit[i->first]) << endl;
       }
     SIGHT_VERB_FI()
+#endif
   }
 }
 

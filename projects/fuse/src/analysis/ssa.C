@@ -1,4 +1,6 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "partitions.h"
 #include "abstract_object.h"
 #include "compose.h"
@@ -8,15 +10,25 @@
 #include <boost/graph/topological_sort.hpp>
 #include "ssa.h"
 
+#ifndef DISABLE_SIGHT
+
 #include "sight.h"
-using namespace std;
 using namespace sight;
+
+#endif
+
+#ifdef DISABLE_SIGHT
+#include "sight-disable.h"
+#endif
+
 using namespace boost;
 
 namespace fuse {
 
+#ifndef DISABLE_SIGHT
 #define atsDebugLevel 0
 #define moduleProfile false
+#endif
 
 /* ###########################
    ##### SSAMemLocObject #####
@@ -385,7 +397,9 @@ void SSAGraph::showDominatorTree() {
 
   dot << "}"<<endl;
 
+#ifndef DISABLE_SIGHT
   sight::structure::graph g(dot.str());
+#endif
 }
 
 void SSAGraph::showDominanceFrontier() {
@@ -396,20 +410,28 @@ void SSAGraph::showDominanceFrontier() {
   for(std::pair<vertex_iter, vertex_iter> vp = vertices(*this); vp.first != vp.second; ++vp.first)
     dot << "node"<<*(vp.first)<<" [label=\""<<(*this)[*(vp.first)]->str()<<"\"];"<<endl;
 
+#ifndef DISABLE_SIGHT
   dbg << "showDominanceFrontier:"<<endl;
+#endif
   for(map<PartPtr, std::set<PartPtr> >::const_iterator n=dominanceFrontiers.begin(); n!=dominanceFrontiers.end(); n++) {
+#ifndef DISABLE_SIGHT
     dbg << "n="<<n->first->str()<<endl;
     BOOST_FOREACH(PartPtr f, n->second) { dbg << "    :"<<f->str()<<endl; }
+#endif
     vector<PartPtr> cur; cur.push_back(n->first);
     set<PartPtr> front = calculateIteratedDominanceFrontier(cur);
+#ifndef DISABLE_SIGHT
     BOOST_FOREACH(PartPtr f, front) { dbg << "    ~"<<f->str()<<endl; }
+#endif
     for(std::set<PartPtr>::const_iterator i=front.begin(); i!=front.end(); i++)
       dot << "node"<<nodesToVertices[n->first]<<" -> node"<<nodesToVertices[*i]<<endl;
   }
 
   dot << "}"<<endl;
 
+#ifndef DISABLE_SIGHT
   sight::structure::graph g(dot.str());
+#endif
 }
 
 std::set<SSAMemLocObjectPtr> SSAGraph::emptySSAMemLocObjectSet;
@@ -681,6 +703,7 @@ void SSAGraph::collectDefsUses() {
 }
 
 void SSAGraph::showDefsUses() {
+#ifndef DISABLE_SIGHT
   dbg << "<u>defs</u>"<<endl;
   dbg << "<table border=1>";
   for(map<PartPtr, set<SSAMemLocObjectPtr> >::iterator d=defs.begin(); d!=defs.end(); ++d) {
@@ -715,6 +738,7 @@ void SSAGraph::showDefsUses() {
     dbg << "</table></td></tr>";
   }
   dbg << "</table>";
+#endif
 }
 
 // Finds all the Parts where phi nodes should be placed and identifies the MemLocs they must define
@@ -773,7 +797,9 @@ void ReplaceStringInPlace(std::string& subject, const std::string& search,
 }
 
 void SSAGraph::showPhiNodes() {
+#ifndef DISABLE_SIGHT
   scope s("showPhiNodes");
+#endif
 
   /*dbg << "<u>phiDefs</u>"<<endl;
   dbg << "<table border=1>";
@@ -891,7 +917,9 @@ void SSAGraph::showPhiNodes() {
   }
   dot << "}"<<endl;
 
+#ifndef DISABLE_SIGHT
   sight::structure::graph g(dot.str());
+#endif
 }
 
 // Returns the mapping of phiDef MemLocs at the given phiNode before the given part
@@ -933,12 +961,16 @@ int SSAGraph::getPhiNodeID(PartPtr part) {
 
 // Returns whether the given def terminates at the given phi node
 bool SSAGraph::defTerminatesAtPhiNode(PartPtr phiPart, SSAMemLocObjectPtr def) const {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, (txt()<<"defTerminatesAtPhiNode()"), 3, atsDebugLevel)
+#endif
 
   map<PartPtr, map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr> > >::const_iterator node=phiDefs.find(phiPart);
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "phiPart(found="<<(node != phiDefs.end())<<")="<<phiPart->str()<<endl, 3, atsDebugLevel)
   SIGHT_VERB(dbg << "def="<<def<<endl, 3, atsDebugLevel)
+#endif
 
   // If this is not a phi node, def cannot terminate at it
   if(node == phiDefs.end()) return false;
@@ -1218,24 +1250,32 @@ bool SSAGraph::mergeLiveDefs(list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> 
         matchingToLiveDefs.push_back(liveDef);
       }
     }
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << "#matchingToLiveDefs="<<matchingToLiveDefs.size()<<endl, 3, atsDebugLevel)
+#endif
 
     // If this group in fromLiveDefs matches no groups in toLiveDefs, add a new one
     if(matchingToLiveDefs.size()==0) {
       toLiveDefs.push_back(make_pair(from->first->copyAOType(), from->second));
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "Adding new group "<<from->first->str(), 3, atsDebugLevel)
+#endif
       modified = true;
 
     // Otherwise, if this group in fromLiveDefs matches exactly one group in toLiveDefs, add its SSAMemLocObjects to it
     } else if(matchingToLiveDefs.size()==1) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "Adding reaching defs to existing group "<<from->first->str(), 3, atsDebugLevel)
+#endif
 
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_IF(3, atsDebugLevel)
       scope s("matchingToLiveDefs Before");
       for(set<SSAMemLocObjectPtr>::iterator match=(*matchingToLiveDefs.begin())->second.begin(); match!=(*matchingToLiveDefs.begin())->second.end(); ++match) {
         dbg << (*match)->str()<<endl;
       }
       SIGHT_VERB_FI()
+#endif
 /*
       // The elements in the matching set in toLiveDefs may relate to fromDef in two ways:
       // - fromDef is a replacement for the matching mapping (it is a phi node that the to mapping reaches
@@ -1271,12 +1311,16 @@ bool SSAGraph::mergeLiveDefs(list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> 
         (*matchingToLiveDefs.begin())->second.insert(fromDef);
       }
       modified = modified || (origSize!=(*matchingToLiveDefs.begin())->second.size());
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "    modified="<<modified<<", origSize="<<origSize<<", (*matchingToLiveDefs.begin())->second.size()="<<(*matchingToLiveDefs.begin())->second.size(), 3, atsDebugLevel)
+#endif
 
     // Otherwise, if this group in fromLiveDefs matches multiple groups in toLiveDefs, merge the groups in toLiveDefs
     // and add the from group to the merged group
     } else {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "Merging multiple to groups", 3, atsDebugLevel)
+#endif
       // Points to the element of curLiveDefs into which the others will be merged
       list<list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::iterator>::iterator target = matchingToLiveDefs.begin();
       list<list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::iterator>::iterator m=target; ++m;
@@ -1302,41 +1346,63 @@ bool SSAGraph::mergeLiveDefs(list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> 
 }
 
 void printLiveDefs(std::string label, const list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >& curLiveDefs) {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(2, atsDebugLevel)
   { scope s(label);
   for(list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::const_iterator group=curLiveDefs.begin(); group!=curLiveDefs.end(); ++group) {
     scope s(txt()<<"Group "<<group->first->str());
     for(set<SSAMemLocObjectPtr>::iterator d=group->second.begin(); d!=group->second.end(); ++d) {
+
       dbg << (*d)->str()<<endl;
     }
   } }
   SIGHT_VERB_FI()
+#endif
 }
 
 // Returns whether the two collections of live defs contain the same defs
 bool SSAGraph::equalLiveDefs(const list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >& aLD,
                              const list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >& bLD)
 {
-  if(aLD.size() != bLD.size()) { SIGHT_VERB(dbg << "different sizes;"<<endl, 3, atsDebugLevel) return false; }
+  if(aLD.size() != bLD.size()) {
+#ifndef DISABLE_SIGHT
+    SIGHT_VERB(dbg << "different sizes;"<<endl, 3, atsDebugLevel)
+#endif
+      return false;
+  }
 
   list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::const_iterator a=aLD.begin(), b=bLD.begin();
   for(; a!=aLD.end(); ++a, ++b) {
-    if(a->second.size() != b->second.size()) { SIGHT_VERB(dbg << "different sub-size in a->first="<<a->first->str()<<endl, 3, atsDebugLevel) return false; }
+    if(a->second.size() != b->second.size()) {
+#ifndef DISABLE_SIGHT
+      SIGHT_VERB(dbg << "different sub-size in a->first="<<a->first->str()<<endl, 3, atsDebugLevel)
+#endif
+        return false;
+    }
 
     set<SSAMemLocObjectPtr>::const_iterator aDef=a->second.begin(), bDef=b->second.begin();
     for(; aDef!=a->second.end(); ++aDef, ++bDef) {
-      if(*aDef != *bDef) { SIGHT_VERB(dbg << "different SSAML aDef="<<(*aDef)->str()<<", bDef="<<(*bDef)->str()<<endl, 3, atsDebugLevel) return false; }
+      if(*aDef != *bDef) {
+#ifndef DISABLE_SIGHT
+        SIGHT_VERB(dbg << "different SSAML aDef="<<(*aDef)->str()<<", bDef="<<(*bDef)->str()<<endl, 3, atsDebugLevel)
+#endif
+          return false; }
     }
   }
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "equal"<<endl, 3, atsDebugLevel)
-  return true;
+#endif
+
+    return true;
 }
 
 // Computes the mapping from MemLoc uses to their defs
 void SSAGraph::computeUse2Def() {
+#ifndef DISABLE_SIGHT
   SIGHT_DECL(module, (instance("computeUse2Def", 0, 0)), moduleProfile)
   SIGHT_VERB_DECL(scope, ("computeUse2Def"), 3, atsDebugLevel)
+#endif
 
   // Maps each Part to set of MemLocs that were defined earlier than the Part and that
   // we're keeping track of to identify their definition points. The MemLocs are organized
@@ -1376,10 +1442,14 @@ void SSAGraph::computeUse2Def() {
     set<CFGNode> cfgNodes = part->CFGNodes();
     ROSE_ASSERT(cfgNodes.size()==1);
     CFGNode cn = *cfgNodes.begin();
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"part "<<part->str()), 3, atsDebugLevel)
+#endif
 
 
+#ifndef DISABLE_SIGHT
     module* iterMod;
+#endif
     string label="";
     SIGHT_IF(moduleProfile)
     if(isSgVariableDeclaration(cn.getNode())) {
@@ -1397,6 +1467,7 @@ void SSAGraph::computeUse2Def() {
       label = isSgFunctionDefinition(cn.getNode())->get_declaration()->get_name().getString();
     }
 
+#ifndef DISABLE_SIGHT
     SIGHT_FI()
     SIGHT_DECL_REF(module, (instance("Iteration", 5, 0),
                             inputs(port(context("iter", iter,
@@ -1406,6 +1477,7 @@ void SSAGraph::computeUse2Def() {
                    iterMod, moduleProfile)
 
     SIGHT_VERB(printLiveDefs("inLiveDefs", inLiveDefs[part]), 3, atsDebugLevel)
+#endif
 
     // The liveDefs set we'll propagate to this part's successors
     // Initialize outLiveDefs from inLiveDefs
@@ -1425,30 +1497,43 @@ void SSAGraph::computeUse2Def() {
     // --------------------------------------
     // If any grouping of defs in curLiveDefs contains more than one SSAMemLoc, there is ambiguity about
     // the definitions reaching this ATS node. We therefore place a phi node immediately before it.
-    { SIGHT_VERB_DECL(scope, ("Phi Node Detection"), 3, atsDebugLevel)
+    {
+#ifndef DISABLE_SIGHT
+      SIGHT_VERB_DECL(scope, ("Phi Node Detection"), 3, atsDebugLevel)
+#endif
+        
     // Collects iterators to all the def groups that are ambiguous
     list<list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::iterator> ambiguousMemLocs;
     for(list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::iterator liveD=curLiveDefs.begin(); liveD!=curLiveDefs.end(); ++liveD) {
       if(liveD->second.size()>1) ambiguousMemLocs.push_back(liveD);
     }
+    
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << "#ambiguousMemLocs="<<ambiguousMemLocs.size()<<endl, 3, atsDebugLevel)
+#endif
 
     // For each ambiguous grouping
     for(list<list<pair<MemLocObjectPtr, set<SSAMemLocObjectPtr> > >::iterator>::iterator aml=ambiguousMemLocs.begin(); aml!=ambiguousMemLocs.end(); ++aml) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt()<<"Ambiguous: "<<(*aml)->first->str()), 3, atsDebugLevel)
+#endif
       // Create a phiDef at this ATS node
       SSAMemLocObjectPtr phiDef = makePtr<SSAMemLocObject>((*aml)->first, part, (SgNode*)NULL, SSAMemLocObject::phiDef, phiDefs[part].size());
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "phiDef="<<phiDef->str()<<endl, 3, atsDebugLevel)
+#endif
       phiDefs[part][phiDef] = (*aml)->second;
 
       // Replace the grouping in curLiveDefs with the MemLoc defined at this phiNode
       (*aml)->second.clear();
       (*aml)->second.insert(phiDef);
     }
+#ifndef DISABLE_SIGHT
     SIGHT(iterMod->setInCtxt(1, context("numAmbiguousMLs", (int)ambiguousMemLocs.size(),
                                         "numPhiDefs",      (int)phiDefs[part].size())),
           moduleProfile)
     SIGHT_VERB(dbg << "#phiDefs[part]="<<phiDefs[part].size()<<endl, 3, atsDebugLevel)
+#endif
     }
 
     // NOTE: We place phi nodes based on ambiguity about reaching defs and not based on control ambiguity.
@@ -1765,14 +1850,17 @@ void SSAGraph::computeUse2Def() {
 void SSAGraph::showUse2Def() {
   ostringstream dot;
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(2, atsDebugLevel)
-  { scope s1("use2def");
+  {
+    scope s1("use2def");
   for(map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr>  >::iterator i=use2def.begin(); i!=use2def.end(); i++) {
     scope s(i->first->str());
     for(set<SSAMemLocObjectPtr>::iterator j=i->second.begin(); j!=i->second.end(); j++)
       dbg << "    "<<(*j)->str()<<endl;
   }}
-
+#endif
+#ifndef DISABLE_SIGHT
   { scope s2("def2use");
   for(map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr>  >::iterator i=def2use.begin(); i!=def2use.end(); i++) {
     //dbg << "i->first="<<i->first.get()<<endl;
@@ -1781,6 +1869,7 @@ void SSAGraph::showUse2Def() {
       dbg << "    "<<(*j)->str()<<endl;
   } }
   SIGHT_VERB_FI()
+#endif
 
   dot << "digraph Use2Def {"<<endl;
 
@@ -1845,7 +1934,9 @@ void SSAGraph::showUse2Def() {
 
   dot << "}"<<endl;
 
+#ifndef DISABLE_SIGHT
   sight::structure::graph g(dot.str());
+#endif
 }
 
 void SSAGraph::buildSSA() {
@@ -1874,7 +1965,11 @@ void SSAGraph::buildSSA() {
 
   collectDefsUses();
   SIGHT_VERB_IF(2, atsDebugLevel)
+    
+#ifndef DISABLE_SIGHT
   scope s("DefsUses");
+#endif
+
   showDefsUses();
   SIGHT_VERB_FI()
 
@@ -1886,7 +1981,11 @@ void SSAGraph::buildSSA() {
 
   computeUse2Def();
   SIGHT_VERB_IF(1, atsDebugLevel)
+
+#ifndef DISABLE_SIGHT
   scope s("Use2Def");
+#endif
+
   showUse2Def();
   showPhiNodes();
   SIGHT_VERB_FI()

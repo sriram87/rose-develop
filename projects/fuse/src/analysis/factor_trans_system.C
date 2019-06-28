@@ -1,13 +1,16 @@
 #include "sage3basic.h"
-#include "factor_trans_system.h"
-#include <algorithm>
 
 using namespace std;
+
+#include "factor_trans_system.h"
+#include <algorithm>
 
 namespace fuse {
 
 //int factorTransSystemDebugLevel=0;
+#ifndef DISABLE_SIGHT
 DEBUG_LEVEL(factorTransSystemDebugLevel, 0);
+#endif
 
 FactorTransStatePtr NULLFactorTransState;
 FactorTransEdgePtr NULLFactorTransEdge;
@@ -234,13 +237,18 @@ std::list<PartEdgePtr> FactorTransState::outEdges_base() {
   assert(myCommonFactor==1);
 
   list<PartEdgePtr> edges;
+#ifndef DISABLE_SIGHT
   scope reg("FactorTransState::outEdges_base", scope::medium, attrGE("factorTransSystemDebugLevel", 1));
   if(factorTransSystemDebugLevel()>=1) dbg << "#transitionFactors="<<transitionFactors.size()<<", numSteps="<<numSteps<<", maxSteps="<<dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxSteps<<", numRollbackSteps="<<dynamic_cast<FactorTransSystemAnalysis*>(analysis)->numRollbackSteps<<endl;
+#endif
   // If we have not yet reached the maximum number of steps, advance
   if(numSteps < dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxSteps-1) {
     for(set<int>::iterator i=transitionFactors.begin(); i!=transitionFactors.end(); i++) {
       edges.push_back(makePtr<FactorTransEdge>(transitionFactors, subGraphTransFactors, curVal, curVal * *i, numSteps, numSteps+1, analysis));
+
+#ifndef DISABLE_SIGHT
       if(factorTransSystemDebugLevel()>=1) dbg << "curVal="<<curVal<<" * *i="<<(*i)<<" = "<<(curVal * *i)<<endl;
+#endif
     }
   // Otherwise, if we have reached the maximum, roll back a fixed number of steps
   } else {
@@ -252,12 +260,18 @@ std::list<PartEdgePtr> FactorTransState::outEdges_base() {
 
     // inVals_prior now contains all the values that are numRollbackSteps behind the curVal we started with.
     // Now, create the edges from curVal to those values
+#ifndef DISABLE_SIGHT
     if(factorTransSystemDebugLevel()>=1) dbg << "inVals.size()="<<inVals->size()<<endl;
+#endif
+
     for(set<int>::iterator v=inVals->begin(); v!=inVals->end(); v++) {
       edges.push_back(makePtr<FactorTransEdge>(transitionFactors, subGraphTransFactors, curVal, *v, numSteps,
                                          dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxSteps -
                                          dynamic_cast<FactorTransSystemAnalysis*>(analysis)->numRollbackSteps - 1, analysis));
+
+#ifndef DISABLE_SIGHT
       if(factorTransSystemDebugLevel()>=1) dbg << "curVal="<<curVal<<" *v = "<<*v<<endl;
+#endif
     }
 
     delete inVals;
@@ -268,13 +282,20 @@ std::list<PartEdgePtr> FactorTransState::outEdges_base() {
 // Version of outEdges for transition systems that are derived from other ones (have a non-NULL parent)
 std::list<PartEdgePtr> FactorTransState::outEdges_derived() {
   list<PartEdgePtr> edges;
+#ifndef DISABLE_SIGHT
   scope reg("FactorTransState::outEdges_derived", scope::medium, attrGE("factorTransSystemDebugLevel", 1));
+
   if(factorTransSystemDebugLevel()>=1) dbg << "    "<<str("    ")<<endl;
+#endif
 
   list<PartEdgePtr> baseOutEdges = getInputPart()->outEdges();
   // If we've reached the end of the sub-graph associated with the parent state
   if(numStepsInDerivedGraph == dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxNumStepsInDerivedGraph-1) {
+
+#ifndef DISABLE_SIGHT
     if(factorTransSystemDebugLevel()>=1) dbg << "Reached End"<<endl;
+#endif
+
     for(list<PartEdgePtr>::iterator e=baseOutEdges.begin(); e!=baseOutEdges.end(); e++) {
       FactorTransEdgePtr baseEdge = dynamicPtrCast<FactorTransEdge>(*e); assert(baseEdge);
       PartEdgePtr pedge = makePtr<FactorTransEdge>(*e,
@@ -282,20 +303,25 @@ std::list<PartEdgePtr> FactorTransState::outEdges_derived() {
                                          baseEdge->srcVal, baseEdge->srcNumSteps, numStepsInDerivedGraph,   myCommonFactor, //sgtFactorIt,
                                          baseEdge->tgtVal, baseEdge->tgtNumSteps, 0,                        1, //sgtFactorIt,
                                          /*1,*/ analysis);
+#ifndef DISABLE_SIGHT
       if(factorTransSystemDebugLevel()>=1) dbg << "    pedge="<<pedge->str("            ")<<endl;
-
+#endif
       edges.push_back(pedge);
     }
   // Otherwise, if we're still in the middle of the sub-graph
   } else {
+#ifndef DISABLE_SIGHT
     if(factorTransSystemDebugLevel()>=1) dbg << "Not Reached End"<<endl;
+#endif
     //for(list<PartEdgePtr>::iterator e=baseOutEdges.begin(); e!=baseOutEdges.end(); e++) {
       for(set<int>::iterator f=subGraphTransFactors.begin(); f!=subGraphTransFactors.end(); f++) {
         PartEdgePtr pedge = makePtr<FactorTransEdge>(getInputPart()->inEdgeFromAny(), transitionFactors, subGraphTransFactors,
                                            curVal, numSteps, numStepsInDerivedGraph,   myCommonFactor, //sgtFactorIt,
                                            curVal, numSteps, numStepsInDerivedGraph+1, myCommonFactor * *f, // sgtFactorIt,
                                            /*myCommonFactor * *f, */analysis);
+#ifndef DISABLE_SIGHT
         if(factorTransSystemDebugLevel()>=1) dbg << "    Factor="<<*f<<": pedge="<<pedge->str("            ")<<endl;
+#endif
         edges.push_back(pedge);
       }
     //}
@@ -319,8 +345,11 @@ std::list<PartEdgePtr> FactorTransState::inEdges_base() {
   assert(myCommonFactor==1);
 
   list<PartEdgePtr> edges;
+#ifndef DISABLE_SIGHT
   scope reg("FactorTransState::inEdges_base", scope::medium, attrGE("factorTransSystemDebugLevel", 1));
+
   if(factorTransSystemDebugLevel()>=1) dbg << "this="<<str()<<endl;
+#endif
   // If we're not at a location in the transition graph to which we may roll back to when we reach the
   // maximum number of transitions.
   if(numSteps != dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxSteps -
@@ -333,14 +362,18 @@ std::list<PartEdgePtr> FactorTransState::inEdges_base() {
         if(curVal % *t == 0) {
           edges.push_back(makePtr<FactorTransEdge>(transitionFactors, subGraphTransFactors,
                                                     curVal / *t, curVal, numSteps-1, numSteps, analysis));
+#ifndef DISABLE_SIGHT
           if(factorTransSystemDebugLevel()>=1) dbg << "curVal="<<curVal<<" / *t="<<(*t)<<" = "<<(curVal / *t)<<endl;
+#endif
         }
       }
     }
   // Otherwise, roll forward numRollbackSteps steps to all the states that could have rolled back
   // to this state
   } else {
+#ifndef DISABLE_SIGHT
     if(factorTransSystemDebugLevel()>=1) dbg << "<u>Unrolling forward</u>"<<endl;
+#endif
     // In every iteration we'll take the values in outVals_prior, multiply them by all the multipliers in
     // transitionFactors and insert the results into outVals_next. We'll then move outVals_next to
     // outVals_prior and repeat this for a numRollbackSteps number of iterations
@@ -354,7 +387,9 @@ std::list<PartEdgePtr> FactorTransState::inEdges_base() {
                                          *v, curVal,
                                          dynamic_cast<FactorTransSystemAnalysis*>(analysis)->maxSteps - 1,
                                          numSteps, analysis));
+#ifndef DISABLE_SIGHT
       if(factorTransSystemDebugLevel()>=1) dbg << "curVal="<<curVal<<" *v = "<<*v<<endl;
+#endif
     }
 
     delete outVals;
@@ -365,8 +400,10 @@ std::list<PartEdgePtr> FactorTransState::inEdges_base() {
 // Version of inEdges for transition systems that are derived from other ones (have a non-NULL parent)
 std::list<PartEdgePtr> FactorTransState::inEdges_derived() {
   list<PartEdgePtr> edges;
+#ifndef DISABLE_SIGHT
   scope reg("FactorTransState::inEdges_derived", scope::medium, attrGE("factorTransSystemDebugLevel", 1));
   if(factorTransSystemDebugLevel()>=1) dbg << "#transitionFactors="<<transitionFactors.size()<<endl;
+#endif
 
   // If we've reached the start of the sub-graph associated with the parent state
   if(numStepsInDerivedGraph == 0) {

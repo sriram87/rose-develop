@@ -3,6 +3,8 @@
  *****************************************/
 
 #include "sage3basic.h"
+using namespace std;
+
 #include "tight_composer.h"
 #include <boost/enable_shared_from_this.hpp>
 #include "sight.h"
@@ -10,9 +12,12 @@
 #include "ssa.h"
 #include <algorithm>
 
-using namespace std;
+
 using namespace boost;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 #define tightComposerDebugLevel 0
 #if tightComposerDebugDevel==0
@@ -31,13 +36,14 @@ namespace fuse {
    ***************/
 
   bool Expr2AnyKey::operator<(const Expr2AnyKey& that) const {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"Expr2AnyKey::<", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "this=" << str() << endl;
       dbg << "that=" << that.str() << endl;
     SIGHT_VERB_FI()
-
+#endif
     // Order by the sgn expression first
     if(sgn < that.sgn) {
       // if(tightComposerDebugLevel >= 4) dbg << "this < that=" << "true";
@@ -89,19 +95,23 @@ namespace fuse {
    ********************************/
 
   void TightCompositionQueryManager::initializeQuery(Expr2AnyKey key) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"initializeQuery", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     // There is no prior entry in the map
     map<Expr2AnyKey, Expr2AnyState>::iterator loc = queryStateMap.find(key);
     assert(loc == queryStateMap.end());
     pair<Expr2AnyKey, Expr2AnyState> elem = make_pair(key, Expr2AnyState());
     queryStateMap.insert(elem);
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 4) dbg << this->str();
+#endif
   }
 
   const Expr2AnyState TightCompositionQueryManager::getQueryState(Expr2AnyKey key) const {
@@ -122,12 +132,14 @@ namespace fuse {
   }
 
   bool TightCompositionQueryManager::isLoopingQuery(Expr2AnyKey key, ComposedAnalysis* analysis_) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"isLoopingQuery", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     map<Expr2AnyKey, Expr2AnyState>::iterator loc = queryStateMap.find(key);
     if(loc == queryStateMap.end()) return false;
@@ -154,12 +166,14 @@ namespace fuse {
   }
 
   void TightCompositionQueryManager::transToAnalState(Expr2AnyKey key, ComposedAnalysis* analysis_) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"transToAnalState", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     // key is already in the map
     map<Expr2AnyKey, Expr2AnyState>::iterator loc = queryStateMap.find(key);
@@ -193,12 +207,14 @@ namespace fuse {
   }
 
   void TightCompositionQueryManagerTest::initializeQuery(Expr2AnyKey key) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"initializeQuery", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     // There is no prior entry in the map
     //cout << "key=" << key.str() << endl;
@@ -209,7 +225,9 @@ namespace fuse {
     assert(loc == queryStateMap.end());
     pair<Expr2AnyKey, Expr2AnyState> elem = make_pair(key, Expr2AnyState());
     queryStateMap.insert(elem);
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 4) dbg << this->str();
+#endif
   }
 
   const Expr2AnyState TightCompositionQueryManagerTest::getQueryState(Expr2AnyKey key) const {
@@ -230,12 +248,14 @@ namespace fuse {
   }
 
   bool TightCompositionQueryManagerTest::isLoopingQuery(Expr2AnyKey key, ComposedAnalysis* analysis_) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"isLoopingQuery", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     map<Expr2AnyKey, Expr2AnyState>::iterator loc = queryStateMap.find(key);
     if(loc == queryStateMap.end()) return false;
@@ -262,12 +282,14 @@ namespace fuse {
   }
 
   void TightCompositionQueryManagerTest::transToAnalState(Expr2AnyKey key, ComposedAnalysis* analysis_) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"transToAnalState", scope::medium), 4, tightComposerDebugLevel)
 
     SIGHT_VERB_IF(4, tightComposerDebugLevel)
       dbg << "key=" << key.str() << endl;
       dbg << this->str();
     SIGHT_VERB_FI()
+#endif
 
     // key is already in the map
     map<Expr2AnyKey, Expr2AnyState>::iterator loc = queryStateMap.find(key);
@@ -394,10 +416,13 @@ namespace fuse {
                                                     function<bool (ComposedAnalysis*)> implementsExpr2AnyOp,
                                                     function<shared_ptr<AOType> (ComposedAnalysis*, SgNode*, PartEdgePtr)> Expr2AnyOp,
                                                     function<shared_ptr<AOType> (SgNode*, PartEdgePtr)> parentComposerExpr2AnyOp) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::Expr2Any", scope::medium), 3, tightComposerDebugLevel)
+#endif
 
     list<Expr2AnyKey>::iterator qIt;
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(3, tightComposerDebugLevel)
       dbg << "queryList=[\n";
       for(qIt = queryList.begin(); qIt != queryList.end(); ++qIt) {
@@ -406,7 +431,8 @@ namespace fuse {
       dbg << "]\n";
       dbg << "queryMap=[" << tcqm.str() << "]\n";
     SIGHT_VERB_FI()
-
+#endif
+      
     if(recursiveQueries(queryList, client)) {
       // return boost::make_shared<FullAOType>();
       boost::shared_ptr<AnalysisMapAOType> amao_p = boost::make_shared<AnalysisMapAOType>(Intersection, client);
@@ -447,7 +473,9 @@ namespace fuse {
         // Union of the responses to all the queries
         boost::shared_ptr<CombinedAOType> cao_p = boost::make_shared<CombinedAOType>();
         for(qIt = queryList.begin(); qIt != queryList.end(); ++qIt) {
+#ifndef DISABLE_SIGHT
           SIGHT_VERB_DECL(scope, (txt()<<"query "<<qIt->str()), 3, tightComposerDebugLevel)
+#endif
           Expr2AnyKey query = *qIt;
           // Transition this query to analysis state corresponding to *a
           tcqm.transToAnalState(query, *a);
@@ -455,7 +483,9 @@ namespace fuse {
           // Dispatch the query to the analysis
           boost::shared_ptr<AOType> ao_p = Expr2AnyOp(*a, query.sgn, query.pedge);
 
+#ifndef DISABLE_SIGHT
           SIGHT_VERB(dbg << (*a)->str() << ":" << ao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
 
           //dbg << "cao_p="<<cao_p->str()<<endl;
           cao_p->add(ao_p, query.pedge, this, client);
@@ -470,7 +500,9 @@ namespace fuse {
         // intersection, which we must have already created.
         else {
           assert(cao_p);
+#ifndef DISABLE_SIGHT
           SIGHT_VERB(dbg << "cao_p="<<cao_p->str()<<endl, 3, tightComposerDebugLevel)
+#endif
           amao_p->add(*a, cao_p, pedge, this, client);
         }
         ++numRespondingAnalyses;
@@ -489,7 +521,9 @@ namespace fuse {
 
         boost::shared_ptr<AOType> ao_p = parentComposerExpr2AnyOp(query.sgn, query.pedge);
 
+#ifndef DISABLE_SIGHT
         SIGHT_VERB(dbg << dynamic_cast<ComposedAnalysis*>(getComposer())->str() << ":" << ao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
 
         cao_p->add(ao_p, query.pedge, this, client);
       }
@@ -500,7 +534,9 @@ namespace fuse {
 //    gettimeofday(&gopeEnd, NULL); cout << "TightComposer::Expr2Any(parent)\t"<<(((gopeEnd.tv_sec*1000000 + gopeEnd.tv_usec) - (gopeStart.tv_sec*1000000 + gopeStart.tv_usec)) / 1000000.0)<<endl;
     }
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << amao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
 
     finalizeQueryList(queryList);
     //return amao_p;
@@ -517,10 +553,13 @@ namespace fuse {
                                                     function<shared_ptr<AOType> (ComposedAnalysis*, SgNode*, PartEdgePtr)> Expr2AnyOp,
                                                     function<shared_ptr<AOType> (SgNode*, PartEdgePtr)> parentComposerExpr2AnyOp) {
       struct timeval gopeStart, gopeEnd; gettimeofday(&gopeStart, NULL);
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::Expr2Any", scope::medium), 3, tightComposerDebugLevel)
+#endif
 
     list<Expr2AnyKey>::iterator qIt;
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(3, tightComposerDebugLevel)
       dbg << "queryList=[\n";
       for(qIt = queryList.begin(); qIt != queryList.end(); ++qIt) {
@@ -529,6 +568,7 @@ namespace fuse {
       dbg << "]\n";
       dbg << "queryMap=[" << tcqm.str() << "]\n";
     SIGHT_VERB_FI()
+#endif
 
     if(recursiveQueriesTest(queryList, client)) {
       // return boost::make_shared<FullAOType>();
@@ -538,7 +578,9 @@ namespace fuse {
       for(qIt = queryList.begin(); qIt != queryList.end(); ++qIt) {
         Expr2AnyKey query = *qIt;
         boost::shared_ptr<AOType> ao_p = parentComposerExpr2AnyOp(query.sgn, query.pedge);
+#ifndef DISABLE_SIGHT
         SIGHT_VERB(dbg << dynamic_cast<ComposedAnalysis*>(getComposer())->str() << ":" << ao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
         cao_p->add(ao_p, query.pedge, this, client);
       }
 //      amao_p->add(dynamic_cast<ComposedAnalysis*>(getComposer()), cao_p, pedge, this, client);
@@ -613,7 +655,9 @@ namespace fuse {
 
         boost::shared_ptr<AOType> ao_p = parentComposerExpr2AnyOp(query.sgn, query.pedge);
 
+#ifndef DISABLE_SIGHT
         SIGHT_VERB(dbg << dynamic_cast<ComposedAnalysis*>(getComposer())->str() << ":" << ao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
 
         cao_p->add(ao_p, query.pedge, this, client);
       }
@@ -623,7 +667,9 @@ namespace fuse {
 
     }
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << amao_p->str() << endl, 3, tightComposerDebugLevel)
+#endif
 
     finalizeQueryListTest(queryList);
     gettimeofday(&gopeEnd, NULL); cout << "TightComposer::Expr2Any\t"<<(((gopeEnd.tv_sec*1000000 + gopeEnd.tv_usec) - (gopeStart.tv_sec*1000000 + gopeStart.tv_usec)) / 1000000.0)<<endl;
@@ -665,10 +711,13 @@ namespace fuse {
                                                  function<std::set<PartPtr> (ComposedAnalysis*)> GetAnyAStates,
                                                  function<std::set<PartPtr> ()> parentGetAnyAStates)
   {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::GetAnyAStates", scope::medium), 3, tightComposerDebugLevel)
+#endif
 
     list<Expr2AnyKey>::iterator qIt;
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(3, tightComposerDebugLevel)
       dbg << "queryList=[\n";
       for(qIt = queryList.begin(); qIt != queryList.end(); ++qIt) {
@@ -678,6 +727,7 @@ namespace fuse {
       dbg << "queryMap=[" << tcqm.str() << "]\n";
       dbg << "recursiveQueries="<<recursiveQueries(queryList, client)<<endl;
     SIGHT_VERB_FI()
+#endif
 
     if(recursiveQueries(queryList, client)) {
       return parentGetAnyAStates();
@@ -687,7 +737,9 @@ namespace fuse {
     // Dispatch queries to each analysis and store its results into subParts
     map<ComposedAnalysis*, set<PartPtr> > subParts;
     for(list<ComposedAnalysis*>::iterator a = allAnalyses.begin(); a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt()<<(*a)->str()), 3, tightComposerDebugLevel)
+#endif
       if((*a)->implementsATSGraph()) {
         assert(queryList.size()==1);
         Expr2AnyKey query = *queryList.begin();
@@ -700,10 +752,12 @@ namespace fuse {
         subParts[*a] = GetAnyAStates(*a);
 
         //SIGHT_VERB(dbg << (*a)->str() << ":" << ao_p->str() << endl, 3, tightComposerDebugLevel)
+#ifndef DISABLE_SIGHT
         SIGHT_VERB_IF(3, tightComposerDebugLevel)
         for(set<PartPtr>::iterator p=subParts[*a].begin(); p!=subParts[*a].end(); ++p)
           dbg << (*p)->str()<<endl;
         SIGHT_VERB_FI()
+#endif
       }
     }
 
@@ -780,7 +834,9 @@ namespace fuse {
       queryList.push_back(key);
 
       CodeLocObjectPtr rcl_p = Expr2CodeLoc_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
       if(tightComposerDebugLevel >= 2) dbg << "CL=" << rcl_p->str() << endl;
+#endif
       clCache[cacheKey] = rcl_p;
       return rcl_p;
     // Else, if the result of the query has already been computed, return the cached value
@@ -806,7 +862,10 @@ namespace fuse {
 
     // Run all the queries
     CodeLocObjectPtr rcl_p = Expr2CodeLoc_ex(queryList, pedge, client);
+
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 2) dbg << "CL=" << rcl_p->str() << endl;
+#endif
     return rcl_p;
   }
 
@@ -832,7 +891,9 @@ namespace fuse {
   // represent the outcome of the given SgExpression.
   // The objects returned by these functions are expected to be deallocated by their callers.
   ValueObjectPtr TightComposer::Expr2Val(SgNode* n, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::Expr2Val(n="<<SgNode2Str(n)<<", pedge=" << pedge->str(), scope::medium), 2, tightComposerDebugLevel);
+#endif
     pair<SgNode*, PartEdgePtr> cacheKey = make_pair(n, pedge);
     map<pair<SgNode*, PartEdgePtr>, ValueObjectPtr>::iterator cacheLoc = vCache.find(cacheKey);
     // If the result of this query has not yet been cached, compute it and cache it
@@ -843,7 +904,9 @@ namespace fuse {
       queryList.push_back(key);
 
       ValueObjectPtr rv_p = Expr2Val_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
       if(tightComposerDebugLevel >= 2) dbg << "Val=" << rv_p->str() << endl;
+#endif
       vCache[cacheKey] = rv_p;
       return rv_p;
     // Else, if the result of the query has already been computed, return the cached value
@@ -854,7 +917,9 @@ namespace fuse {
   // Variant of Expr2Val that inquires about the value of the memory location denoted by the operand of the
   // given node n, where the part denotes the set of prefixes that terminate at SgNode n.
   ValueObjectPtr TightComposer::OperandExpr2Val(SgNode* n, SgNode* operand, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::OperandExpr2Val(n="<<SgNode2Str(n)<< ", op="<< SgNode2Str(operand) << ", pedge=" << pedge->str()), 2, tightComposerDebugLevel)
+#endif
     list<PartEdgePtr> pedgeList = pedge->getOperandPartEdge(n, operand);
     if(pedgeList.size()==0) return NULLValueObject;
     list<Expr2AnyKey> queryList;
@@ -868,7 +933,9 @@ namespace fuse {
 
     // Run all the queries
     ValueObjectPtr rv_p = Expr2Val_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 2) dbg << "Val=" << rv_p->str() << endl;
+#endif
     return rv_p;
   }
 
@@ -893,7 +960,9 @@ namespace fuse {
   }
 
   MemRegionObjectPtr TightComposer::Expr2MemRegion(SgNode* n, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::Expr2MemRegion(n="<<SgNode2Str(n)<<", pedge=" << pedge->str()), 2, tightComposerDebugLevel)
+#endif
 
 
     /*boost::shared_ptr<PartEdgeUnionMemRegionObject> res = boost::make_shared<PartEdgeUnionMemRegionObject>();
@@ -924,7 +993,9 @@ namespace fuse {
       return cao_p;*/
 
       MemRegionObjectPtr rmr_p = Expr2MemRegion_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
       if(tightComposerDebugLevel >= 2) dbg << "MR=" << rmr_p->str() << endl;
+#endif
       mrCache[cacheKey] = rmr_p;
       return rmr_p;
     // Else, if the result of the query has already been computed, return the cached value
@@ -936,7 +1007,9 @@ namespace fuse {
   // Variant of Expr2MemRegion that inquires about the memory location denoted by the operand of the given node n, where
   // the part denotes the set of prefixes that terminate at SgNode n.
   MemRegionObjectPtr TightComposer::OperandExpr2MemRegion(SgNode* n, SgNode* operand, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::OperandExpr2MemRegion(n="<<SgNode2Str(n)<< ", op="<< SgNode2Str(operand) << ", pedge=" << pedge->str(), scope::medium), 2, tightComposerDebugLevel)
+#endif
     list<PartEdgePtr> pedgeList = pedge->getOperandPartEdge(n, operand);
     if(pedgeList.size()==0) return NULLMemRegionObject;
     list<Expr2AnyKey> queryList;
@@ -950,7 +1023,9 @@ namespace fuse {
 
     // Run all the queries
     MemRegionObjectPtr rmr_p = Expr2MemRegion_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 2) dbg << "MR=" << rmr_p->str() << endl;
+#endif
     return rmr_p;
   }
 
@@ -976,7 +1051,9 @@ namespace fuse {
   //! TightComposer queries all the client analyses implementing Expr2MemLoc
   //! Returns IntersectMemLocObjectPtr
   MemLocObjectPtr TightComposer::Expr2MemLoc(SgNode* n, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::Expr2MemLoc(n="<<SgNode2Str(n)<<", pedge=" << pedge->str(), scope::medium), 2, tightComposerDebugLevel)
+#endif
     pair<SgNode*, PartEdgePtr> cacheKey = make_pair(n, pedge);
     map<pair<SgNode*, PartEdgePtr>, MemLocObjectPtr>::iterator cacheLoc = mlCache.find(cacheKey);
     // If the result of this query has not yet been cached, compute it and cache it
@@ -987,7 +1064,9 @@ namespace fuse {
       queryList.push_back(key);
 
       MemLocObjectPtr rml_p = Expr2MemLoc_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
       if(tightComposerDebugLevel >= 2) dbg << "ML=" << rml_p->str() << endl;
+#endif
       mlCache[cacheKey] = rml_p;
       return rml_p;
     // Else, if the result of the query has already been computed, return the cached value
@@ -998,7 +1077,9 @@ namespace fuse {
   // Variant of Expr2MemLoc that inquires about the memory location denoted by the operand of the given node n, where
   // the part denotes the set of prefixes that terminate at SgNode n.
   MemLocObjectPtr TightComposer::OperandExpr2MemLoc(SgNode* n, SgNode* operand, PartEdgePtr pedge, ComposedAnalysis* client) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::OperandExpr2MemLoc(n="<<SgNode2Str(n)<< ", op="<< SgNode2Str(operand) << ", pedge=" << pedge->str(), scope::medium), 2, tightComposerDebugLevel)
+#endif
 
 //    struct timeval gopeStart, gopeEnd; gettimeofday(&gopeStart, NULL);
     list<PartEdgePtr> pedgeList = pedge->getOperandPartEdge(n, operand);
@@ -1019,7 +1100,9 @@ namespace fuse {
 
     // Run all the queries
     MemLocObjectPtr rml_p = Expr2MemLoc_ex(queryList, pedge, client);
+#ifndef DISABLE_SIGHT
     if(tightComposerDebugLevel >= 2) dbg << "ML=" << rml_p->str() << endl;
+#endif
 
 //    gettimeofday(&queryEnd, NULL); cout << "        TightComposer::OperandExpr2MemLoc() query\t"<<(((queryEnd.tv_sec*1000000 + queryEnd.tv_usec) - (queryStart.tv_sec*1000000 + queryStart.tv_usec)) / 1000000.0)<<endl;
 
@@ -1125,7 +1208,9 @@ namespace fuse {
     // TightComposer is composed as a sub-analysis of LooseSequential (ChainComposer)
     // direct the query GetStartAStates to the parent composer
     //return GetStartAStates_Spec();
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::GetStartAStates("<<client->str()<<")", scope::medium), 2, tightComposerDebugLevel)
+#endif
     Expr2AnyKey key(NULL, NULLPartEdge, Composer::atsGraph);
     list<Expr2AnyKey> queryList;
     queryList.push_back(key);
@@ -1146,7 +1231,9 @@ namespace fuse {
   // implementation is similar in principle to GetStartAStates
   std::set<PartPtr> TightComposer::GetEndAStates(ComposedAnalysis* client) {
     //return GetEndAStates_Spec();
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::GetEndAStates("<<client->str()<<")", scope::medium), 2, tightComposerDebugLevel)
+#endif
     Expr2AnyKey key(NULL, NULLPartEdge, Composer::atsGraph);
     list<Expr2AnyKey> queryList;
     queryList.push_back(key);
@@ -1190,10 +1277,14 @@ namespace fuse {
 
   // go through the list of all analyses and call their initNodeState
   void TightComposer::initNodeState(AnalysisParts& parts) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"TightComposer::initNodeState(part="<<parts.NodeState()->str()<<")"), 2, tightComposerDebugLevel)
+#endif
     list<ComposedAnalysis*>::iterator a = allAnalyses.begin();
     for( ; a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt() << "TightComposer::initNodeState("<<(*a)->str()<<")", scope::medium), 2, tightComposerDebugLevel)
+#endif
       // Initialize the NodeState for the current analysis, passing it the Part from the parent composer,
       // which has a fully constructed ATS, rathern than the Part currently being constructed by this
       // TightComposer. If the current analysis implements the ATS this will enable it to build its Lattices
@@ -1208,7 +1299,9 @@ namespace fuse {
                             // Set of all the Parts that have been initialized
                             std::set<PartPtr>& initialized,
                             // The dataflow iterator that identifies the state of the iteration
-                            dataflowPartEdgeIterator* curNodeIt,
+                            dataflowPartEdgeIterator* curNodeIt
+#ifndef DISABLE_SIGHT
+                            ,
                             // anchor that denotes the current abstract state in the debug output
                             anchor curPartAnchor,
                             // graph widget that visualizes the flow of the worklist algorithm
@@ -1216,60 +1309,99 @@ namespace fuse {
                             // Maps each Abstract State to the anchors of outgoing links that target it from the last visit to its predecessors
                             std::map<PartPtr, std::set<anchor> >& toAnchors,
                             // Maps each Abstract state to the anchors of the AStates that lead to it, as well as the AStates themselves
-                            std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors) {
+                            std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                            ) {
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt() << "TightComposer::propagateDF2DescDense", scope::medium), 1, tightComposerDebugLevel)
+#endif
     list<ComposedAnalysis*>::iterator a = allAnalyses.begin();
     for( ; a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt() << "Analysis "<<(*a)->str(), scope::high), 1, tightComposerDebugLevel)
+#endif
       ComposedAnalysis::propagateDF2DescDense(*a, /*part, part->getSupersetPart(),*/ parts,
-                                                visited, initialized, curNodeIt,
-                                                curPartAnchor, worklistGraph, toAnchors, fromAnchors);
+                                                visited, initialized, curNodeIt
+#ifndef DISABLE_SIGHT
+                                              ,
+                                              curPartAnchor, worklistGraph, toAnchors, fromAnchors
+#endif
+                                              );
     }
   }
 
   // call the generic version of this function on each analysis
   void TightComposer::transferAStateDense(AnalysisParts& parts,
-                               std::set<PartPtr>& visited, bool firstVisit,
-                               std::set<PartPtr>& initialized, dataflowPartEdgeIterator* curNodeIt,
-                               map<PartEdgePtr, vector<Lattice*> >& dfInfoPost,
-                               //set<PartPtr>& ultimateParts, set<PartPtr>& ultimateSupersetParts,
-                               AnalysisPartSets& ultimateParts,
-                               anchor curPartAnchor,
-                               sight::structure::graph& worklistGraph,std::map<PartPtr, std::set<anchor> >& toAnchors,
-                               std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors) {
+                                          std::set<PartPtr>& visited, bool firstVisit,
+                                          std::set<PartPtr>& initialized, dataflowPartEdgeIterator* curNodeIt,
+                                          map<PartEdgePtr, vector<Lattice*> >& dfInfoPost,
+                                          //set<PartPtr>& ultimateParts, set<PartPtr>& ultimateSupersetParts,
+                                          AnalysisPartSets& ultimateParts
+#ifndef DISABLE_SIGHT
+                                          ,
+                                          anchor curPartAnchor,
+                                          sight::structure::graph& worklistGraph,std::map<PartPtr, std::set<anchor> >& toAnchors,
+                                          std::map<PartPtr, std::set<std::pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                                          ) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt() << "TightComposer::transferAStateDense", scope::medium), 1, tightComposerDebugLevel)
+#endif
     list<ComposedAnalysis*>::iterator a = allAnalyses.begin();
     for( ; a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt() << "Analysis "<<(*a)->str(), scope::high), 1, tightComposerDebugLevel)
+#endif
       ComposedAnalysis::transferAStateDense(*a, parts, visited, firstVisit, initialized,
                                             curNodeIt, dfInfoPost,
-                                            ultimateParts, //ultimateSupersetParts,
+                                            ultimateParts /*ultimateSupersetParts*/
+#ifndef DISABLE_SIGHT
+                                            , 
                                             curPartAnchor,
-                                            worklistGraph, toAnchors, fromAnchors);
+                                            worklistGraph, toAnchors, fromAnchors
+#endif
+                                            );
     }
   }
 
-  void TightComposer::transferPropagateAStateSSA(PartPtr part, set<PartPtr>& visited, bool firstVisit, set<PartPtr>& initialized,
-                                        dataflowPartEdgeIterator* curNodeIt, anchor curPartAnchor, sight::structure::graph& worklistGraph,
-                                        map<PartPtr, set<anchor> >& toAnchors,
-                                        map<PartPtr, set<pair<anchor, PartPtr> > >& fromAnchors) {
+void TightComposer::transferPropagateAStateSSA(PartPtr part, set<PartPtr>& visited, bool firstVisit, set<PartPtr>& initialized,
+                                               dataflowPartEdgeIterator* curNodeIt
+#ifndef DISABLE_SIGHT
+                                               , anchor curPartAnchor, sight::structure::graph& worklistGraph,
+                                               map<PartPtr, set<anchor> >& toAnchors,
+                                               map<PartPtr, set<pair<anchor, PartPtr> > >& fromAnchors
+#endif
+                                               ) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt() << "TightComposer::transferPropagateAStateSSA", scope::medium), 1, tightComposerDebugLevel)
+#endif
     list<ComposedAnalysis*>::iterator a = allAnalyses.begin();
     for( ; a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt() << "Analysis "<<(*a)->str(), scope::high), 1, tightComposerDebugLevel)
-      ComposedAnalysis::transferPropagateAStateSSA(*a, part, visited, firstVisit, initialized, curNodeIt, curPartAnchor,
-                                                worklistGraph, toAnchors, fromAnchors);
+#endif
+        ComposedAnalysis::transferPropagateAStateSSA(*a, part, visited, firstVisit, initialized, curNodeIt
+#ifndef DISABLE_SIGHT
+                                                     ,
+                                                     curPartAnchor,
+                                                     worklistGraph, toAnchors, fromAnchors
+#endif
+                                                     );
     }
   }
 
   // Invokes the analysis-specific method to set the ATS location PartEdges of all the newly-computed
   // Lattices at part
   void TightComposer::setDescendantLatticeLocationsDense(AnalysisParts& parts) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt() << "TightComposer::setDescendantLatticeLocationsDense", scope::medium), 1, tightComposerDebugLevel)
+#endif
     list<ComposedAnalysis*>::iterator a = allAnalyses.begin();
     for( ; a != allAnalyses.end(); ++a) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt() << "Analysis "<<(*a)->str(), scope::high), 1, tightComposerDebugLevel)
+#endif
       ComposedAnalysis::setDescendantLatticeLocationsDense(*a, parts);
     }
   }

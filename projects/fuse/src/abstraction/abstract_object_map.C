@@ -1,4 +1,7 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include <iostream>
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include "abstract_object_map.h"
@@ -10,7 +13,10 @@
 
 using namespace std;
 using namespace boost;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse {
 #define AOMDebugLevel 0
@@ -384,9 +390,11 @@ bool AbstractObjectMap::meetUpdate(Lattice* thatL) {
     }
   }
 
+#ifndef DISABLE_SIGHT
   scope s("AbstractObjectMap::meetUpdate()");
   dbg << "this->latPEdge="<<latPEdge->str()<<endl;
   dbg << "that->latPEdge="<<that->latPEdge->str()<<endl;
+#endif
 
   ROSE_ASSERT(0);
 }
@@ -465,11 +473,13 @@ bool AbstractObjectMap::operator==(Lattice* thatL) {
 // Return true if this causes the map to change and false otherwise.
 // It is assumed that the given Lattice is now owned by the AbstractObjectMap and can be modified and deleted by it.
 bool GenericAOM::insert(AbstractObjectPtr o, AbstractionPtr lattice) {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, ("GenericAOM::insert()", scope::medium), 1, AOMDebugLevel)
   SIGHT_VERB_IF(1, AOMDebugLevel)
     dbg << "    o="<<(parent->latPEdge? o->strp(parent->latPEdge, ""): "NULL")<<" lattice="<<lattice->str("    ")<<endl;
     dbg << "        "<<str("        ")<<endl;
   SIGHT_VERB_FI()
+#endif
 
   // Do not insert mappings for dead keys
   if(!o->isLive(parent->latPEdge, parent->comp, parent->analysis)) {
@@ -517,9 +527,11 @@ bool GenericAOM::insert(AbstractObjectPtr o, AbstractionPtr lattice) {
     if(o->mustEqual(keyElement, parent->latPEdge, parent->comp, parent->analysis)) {
       SIGHT_VERB(dbg << "    keyElement="<<keyElement->str("            ")<<" mustEqual(o, keyElement, parent->latPEdge)="<<o->mustEqual(keyElement, parent->latPEdge, parent->comp, parent->analysis)<<" insertDone="<<insertDone<<" mustEqualSeen="<<mustEqualSeen<<endl, 1, AOMDebugLevel)
       SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "    Must Equal"<<endl;
         dbg << "        lattice="<<lattice->str("        ")<<endl;
         dbg << "        it="<<it->second->str("        ")<<endl;
+#endif
       SIGHT_VERB_FI()
 
       // If the old and new mappings of o are different,  we remove the old mapping and add a new one
@@ -573,11 +585,13 @@ bool GenericAOM::insert(AbstractObjectPtr o, AbstractionPtr lattice) {
   // Step 2: if the map is larger than some fixed bound, merge some key->value mappings together
   // !!! TODO !!!
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(1, AOMDebugLevel)
     indent ind();
     dbg << "retVal="<<retVal<<" insertDone="<<insertDone<<" mustEqualSeen="<<mustEqualSeen<<endl;
     dbg << str()<<endl;
   SIGHT_VERB_FI()
+#endif
   return retVal;
 };
 
@@ -600,8 +614,10 @@ bool GenericAOM::remove(AbstractObjectPtr abstractObjectPtr) {
 AbstractionPtr GenericAOM::get(AbstractObjectPtr abstractObjectPtr) {
   SIGHT_VERB_DECL(scope, ("GenericAOM::get()", scope::medium), 1, AOMDebugLevel)
   SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "    o="<<abstractObjectPtr->strp(parent->latPEdge, "    ")<<endl;
     dbg << "        "<<str("        ")<<endl;
+#endif
   SIGHT_VERB_FI()
 
   AbstractionPtr ret;
@@ -609,7 +625,9 @@ AbstractionPtr GenericAOM::get(AbstractObjectPtr abstractObjectPtr) {
        it != items.end(); it++) {
     AbstractObjectPtr keyElement = it->first;
     bool eq = abstractObjectPtr->mayEqual(keyElement, parent->latPEdge, parent->comp, parent->analysis);
+#ifndef DISABLE_SIGHT
     if(AOMDebugLevel>=2 || (AOMDebugLevel>=1 && eq)) dbg << "    keyElement(equal="<<eq<<")="<<keyElement->str("    ")<<endl;
+#endif
     if(eq) {
       // If this is the first matching Lattice, copy this Lattice to ret
       if(!ret) ret = it->second->copyA();
@@ -669,9 +687,11 @@ bool GenericAOM::isEmpty()
   // Check if all items are empty
   for(std::list<MapElement>::iterator i=items.begin(); i!=items.end();) {
     SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
       indent ind;
       dbg << "i->first="<<i->first->str()<<endl;
       dbg << "i->second="<<i->second->str()<<endl;
+#endif
     SIGHT_VERB_FI()
     // If at least one is not empty, return false
     if(!(i->first)->isEmpty(parent->getPartEdge(), parent->comp, parent->analysis) &&
@@ -753,15 +773,20 @@ AbstractObjectMapKindPtr GenericAOM::remapML(const std::set<MLMapping>& ml2ml, P
   SIGHT_VERB_DECL(scope, ("GenericAOM::remapML", scope::medium), 1, AOMDebugLevel)
 
   SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
     // If either the key or the value of this mapping is dead within its respective part, we skip it.
     // Print notices of this skipping once
     for(std::set<MLMapping>::const_iterator m=ml2ml.begin(); m!=ml2ml.end(); m++) {
       if(!m->from) continue;
       // If either the key or the value of this mapping is dead within its respective part, skip it
       if(!m->from->isLive(fromPEdge, parent->comp, parent->analysis) || (m->to && !m->to->isLive(parent->latPEdge, parent->comp, parent->analysis)))
-        dbg << "<b>GenericAOM::remapML() WARNING: Skipping dead ml2ml mapping "<<m->from->strp(fromPEdge)<<"(live="<<m->from->isLive(fromPEdge, parent->comp, parent->analysis)<<") =&gt; "<<(m->to ? m->to->strp(parent->latPEdge) : "NULL")<<"(live="<<(m->to ? m->to->isLive(parent->latPEdge, parent->comp, parent->analysis) : -1)<<")"<<endl
-                 << "    fromPEdge=["<<fromPEdge->str()<<"]"<<endl
-                 << "    parent->latPEdge=["<<(parent->latPEdge? parent->latPEdge->str(): "NULL")<<"]</b>"<<endl;
+        dbg << "<b>GenericAOM::remapML() WARNING: Skipping dead ml2ml mapping "
+	    << m->from->strp(fromPEdge)<<"(live="<<m->from->isLive(fromPEdge, parent->comp, parent->analysis)<<") =&gt; "
+	    << (m->to ? m->to->strp(parent->latPEdge) : "NULL")
+	    << "(live="<<(m->to ? m->to->isLive(parent->latPEdge, parent->comp, parent->analysis) : -1)<<")"<<endl
+	    << "    fromPEdge=["<<fromPEdge->str()<<"]"<<endl
+	    << "    parent->latPEdge=["<<(parent->latPEdge? parent->latPEdge->str(): "NULL")<<"]</b>"<<endl;
+
     }
 
   {
@@ -772,6 +797,7 @@ AbstractObjectMapKindPtr GenericAOM::remapML(const std::set<MLMapping>& ml2ml, P
     }
     //dbg << "this="<<str()<<endl;
   }
+#endif
   SIGHT_VERB_FI()
 
   // Copy of this map where the keys in ml2ml have been remapped to their corresponding values
@@ -806,8 +832,10 @@ AbstractObjectMapKindPtr GenericAOM::remapML(const std::set<MLMapping>& ml2ml, P
       SIGHT_VERB_DECL(indent, (), 1, AOMDebugLevel)
       // If the current item in newM may- or must-equals a key in ml2ml, record this and update newM
       SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "i-&gt;first mustEqual m-&gt;from = "<<i->first->mustEqual((AbstractObjectPtr)m->from, fromPEdge, parent->comp, parent->analysis)<<endl;
         dbg << "i-&gt;first mayEqual m-&gt;from = "<<i->first->mayEqual((AbstractObjectPtr)m->from, fromPEdge, parent->comp, parent->analysis)<<endl;
+#endif
       SIGHT_VERB_FI()
       if(i->first->mustEqual((AbstractObjectPtr)m->from, fromPEdge, parent->comp, parent->analysis) && m->replaceMapping) {
         // If the value of the current ml2ml mapping is not-NULL
@@ -820,9 +848,11 @@ AbstractObjectMapKindPtr GenericAOM::remapML(const std::set<MLMapping>& ml2ml, P
           std::list<MapElement>::iterator iNext = i; iNext++;
           for(std::list<MapElement>::iterator j=iNext; j!=newM->items.end(); ) {
             SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
               dbg << "j="<<j->first<<" => "<<j->second<<endl;
               dbg << mIdx << ": m-&gt;value="<<m->to->strp(fromPEdge)<<endl;
               dbg << "j-&gt;first mustEqual m-&gt;to = "<<j->first->mustEqual((AbstractObjectPtr)m->to, fromPEdge, parent->comp, parent->analysis)<<endl;
+#endif
             SIGHT_VERB_FI()
             if(j->first->mustEqual((AbstractObjectPtr)m->to, fromPEdge, parent->comp, parent->analysis)) {
               SIGHT_VERB(dbg << "Erasing j="<<j->first->str()<<" => "<<j->second->str()<<endl, 2, AOMDebugLevel)
@@ -904,11 +934,13 @@ bool GenericAOM::unionIntersectUpdate(AbstractObjectMapKindPtr thatL, uiType ui)
     assert(that);
 
     SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "parent->latPEdge="<<(parent->latPEdge? parent->latPEdge->str(): "NULL")<<endl;
       { scope thisreg("this", scope::medium);
       dbg << str()<<endl; }
       { scope thisreg("that", scope::medium);
       dbg << that->str()<<endl; }
+#endif
     SIGHT_VERB_FI()
 
     // This algorithm is based on the following insights:
@@ -960,9 +992,11 @@ bool GenericAOM::unionIntersectUpdate(AbstractObjectMapKindPtr thatL, uiType ui)
       thatMustEq.push_back(false);
 
     SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
       scope thisreg("that->items", scope::medium);
       for(list<MapElement>::iterator itThat=that->items.begin(); itThat!=that->items.end(); itThat++)
       dbg << "that: "<<itThat->first->str()<<" ==&gt; "<<itThat->second->str()<<endl;
+#endif
     SIGHT_VERB_FI()
 
     // Determine which elements in this->items are mustEqual to elements in that->items
@@ -1001,22 +1035,27 @@ bool GenericAOM::unionIntersectUpdate(AbstractObjectMapKindPtr thatL, uiType ui)
             if(ui==Union) modified = itThis->second->meetUpdate(itThat->second, parent->latPEdge, parent->comp, parent->analysis) || modified;
             else          modified = itThis->second->intersectUpdate(itThat->second, parent->latPEdge, parent->comp, parent->analysis) || modified;
             SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
             { scope aftreg("after", scope::low); dbg << itThis->second->str()<<endl; }
             dbg << "modified="<<modified<<endl;
+#endif
             SIGHT_VERB_FI()
           }
         }
       }
     }
     SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
       scope eqreg("thisMustEq2thatMustEq", scope::medium);
       for(list<pair<list<MapElement>::iterator, pair<list<MapElement>::iterator, int> > >::iterator it=thisMustEq2thatMustEq.begin();
           it!=thisMustEq2thatMustEq.end(); it++) {
         dbg << (it->first)->first->str() << " =&gt; " << (it->second).first->second->str() << endl;
       }
+#endif
     SIGHT_VERB_FI()
 
-    { SIGHT_VERB(scope insreg("inserting that->this", scope::medium), 2, AOMDebugLevel);
+    {
+      SIGHT_VERB(scope insreg("inserting that->this", scope::medium), 2, AOMDebugLevel);
 
     // Copy over the mappings of all the elements in that->items that were not mustEqual
     // to any elements in this->items. Although any order will work for these elements,
@@ -1028,10 +1067,13 @@ bool GenericAOM::unionIntersectUpdate(AbstractObjectMapKindPtr thatL, uiType ui)
        meIt!=thisMustEq2thatMustEq.end(); meIt++) {
       SIGHT_VERB(scope mapreg(txt()<<"mustEqual mapping "<<meIt->second.second<<": "<<(meIt->first)->first->str(), scope::medium), 2, AOMDebugLevel)
       SIGHT_VERB_IF(2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "this: "<<meIt->first->first->str() << " =&gt; " << meIt->first->second->str() <<endl;
         dbg << "that: "<<(meIt->second).first->first->str() << " =&gt; " << (meIt->second).first->second->str() << endl;
         dbg << "thatIdx="<<thatIdx<<endl;
+#endif
       SIGHT_VERB_FI()
+	
 
       // Copy over all the mappings from that->items from thatIt to meIt's partner in that->items
       // if they have not already been copied because elements that are mustEqual to each other were ordered
@@ -1041,13 +1083,18 @@ bool GenericAOM::unionIntersectUpdate(AbstractObjectMapKindPtr thatL, uiType ui)
           // Copy over the current element from that->items if it doesn't have a mustEqual
           // partner in this->items (i.e. its already been handled)
           if(!(*thatMEIt)) {
-            SIGHT_VERB(dbg << "Inserting at meIt->first="<<(meIt->first)->first->str()<<" mapping "<<thatIt->first->str()<<" ==&gt; "<<thatIt->second->str()<<endl, 2, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
+            SIGHT_VERB(dbg
+		       << "Inserting at meIt->first="<<(meIt->first)->first->str()
+		       <<" mapping "<<thatIt->first->str()<<" ==&gt; "
+		       << thatIt->second->str()
+		       << endl, 2, AOMDebugLevel)
+#endif
             // NOTE: we do not currently update the part field in the lattice thatIt->second
             //       to refer to this->parent->latPEdge. Perhaps we should make a copy of it and update it.
             items.insert(meIt->first, *thatIt);
             modified = true;
-          } else
-            SIGHT_VERB(dbg << "mustEqual partner exists in this"<<endl, 2, AOMDebugLevel)
+          } else { SIGHT_VERB(dbg << "mustEqual partner exists in this"<<endl, 2, AOMDebugLevel) }
         }
         // Advance thatIt and thatIdx once more to account for the partner in that->items
         // of the current entry in this->items
@@ -1336,6 +1383,7 @@ bool HierarchicalAOM::Node::intersectUpdate(AbstractionPtr lat, PartEdgePtr pedg
   return modified;
 }
 
+#ifndef DISABLE_SIGHT
 SightStream& HierarchicalAOM::Node::print(SightStream& s) const {
   s << "Node: key="<<(key?key->str():"NULL")<<", fullKey="<<(fullKey? string(txt()<<fullKey): "NULL")<<", isObjSingleton="<<isObjSingleton<<", val="<<(val?val->str():"NULL")<<endl;
   s << "  subsets="<<endl;
@@ -1350,6 +1398,7 @@ SightStream& HierarchicalAOM::Node::print(SightStream& s) const {
   s << "</table>"<<endl;
   return s;
 }
+#endif
 
 // Returns whether the fullKey at this node may be live at the given pedge
 bool HierarchicalAOM::Node::isLive(PartEdgePtr pedge, Composer* comp, ComposedAnalysis* analysis) {
@@ -1426,12 +1475,14 @@ bool HierarchicalAOM::insert(AbstractObjectPtr obj_arg, AbstractionPtr val, bool
 
   SIGHT_VERB_DECL(scope, ("HierarchicalAOM::insert()", scope::medium), 1, AOMDebugLevel)
   SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
     indent ind;
     dbg << "obj(live="<<obj_arg->isLive(parent->latPEdge, parent->comp, parent->analysis)<<")="<<obj_arg->strp(parent->latPEdge, "")<<endl;
     dbg << "    key="<<obj->getHierKey()<<endl;
     dbg << "lattice(empty="<<val->isEmpty(parent->latPEdge, parent->comp, parent->analysis)<<")="<<val->str("    ")<<endl;
     indent ind2;
     dbg << str()<<endl;
+#endif
   SIGHT_VERB_FI()
 
   // Do not insert mappings for dead keys
@@ -1967,8 +2018,10 @@ bool HierarchicalAOM::unionIntersectUpdate(NodePtr thisST, NodePtr thatST, uiTyp
         if(!newNode->isEmptyVal(parent->latPEdge, parent->comp, parent->analysis)) {
           thisST->subsets[thatSub->first] = newNode;
           SIGHT_VERB_IF(1, AOMDebugLevel)
+#ifndef DISABLE_SIGHT
             dbg << "original node "<<thatSub->second<<endl;
             dbg << "new node "<<newNode<<endl;
+#endif
           SIGHT_VERB_FI()
           modified = true;
         }

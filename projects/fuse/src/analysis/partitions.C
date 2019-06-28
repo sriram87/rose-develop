@@ -1,4 +1,6 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "partitions.h"
 #include "abstract_object.h"
 #include "compose.h"
@@ -7,14 +9,18 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
+#ifndef DISABLE_SIGHT
 #include "sight.h"
-using namespace std;
 using namespace sight;
+#endif
+
 using namespace boost;
 
 namespace fuse {
 
+#ifndef DISABLE_SIGHT
 #define partitionsDebugLevel 0
+#endif
 
 /* #########################
    ##### Remap Functor #####
@@ -108,7 +114,9 @@ void MLRemapper::init(const PartEdgePtr pedge, ComposedAnalysis* client)
       }
     }
   }
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "MLRemapper::init"<<endl<<str() <<endl, 2, partitionsDebugLevel)
+#endif
 }
 
 // Given a lattice returns a freshly-allocated Lattice object that points to Lattice remapped in the forward direction
@@ -249,12 +257,16 @@ void setArgParamMap(PartEdgePtr callEdge, SgFunctionCallExp* call,
                     Composer* composer, ComposedAnalysis* client,
                     bool fw)
 {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, ("setArgParamMap", scope::medium), 1, partitionsDebugLevel)
+#endif
   Function func(call);
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(1, partitionsDebugLevel)
     dbg << "call="<<SgNode2Str(call)<<endl;
     dbg << "callEdge="<<callEdge->str()<<endl;
   SIGHT_VERB_FI()
+#endif
 
   PartPtr callPart = callEdge->source();
   PartPtr funcStartPart = callEdge->target();
@@ -312,11 +324,13 @@ void setArgParamMap(PartEdgePtr callEdge, SgFunctionCallExp* call,
       itA!=args.end() && itP!=params.end();
       itA++, itP++)
   {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, ("iter", scope::low), 1, partitionsDebugLevel)
     SIGHT_VERB_IF(1, partitionsDebugLevel)
       dbg << "itA="<<SgNode2Str(*itA)<<endl;
       dbg << "itP="<<SgNode2Str(*itP)<<endl;
     SIGHT_VERB_FI()
+#endif
     SgType* typeParam = (*itP)->get_type();
 
     // Skip "..." types, which are used to specify VarArgs.
@@ -352,7 +366,9 @@ void setArgByRef2ParamMap(PartEdgePtr callEdge, SgFunctionCallExp* call,
                           std::set<MLMapping>& paramArgByRef2ParamMap,
                           Composer* composer, ComposedAnalysis* client)
 {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, ("setArgByRef2ParamMap", scope::medium), 1, partitionsDebugLevel)
+#endif
   std::set<CFGNode> exitNodes;
   assert(callEdge->source()->mustFuncExit(exitNodes));
   // For now we can only handle 1 CFGNode per Part
@@ -362,7 +378,9 @@ void setArgByRef2ParamMap(PartEdgePtr callEdge, SgFunctionCallExp* call,
 
   PartPtr callPart = callEdge->source();
   PartPtr funcStartPart = callEdge->target();
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "callEdge="<<callEdge->str()<<endl, 1, partitionsDebugLevel)
+#endif
 
   // Part that corresponds to the function, which for now is set to be the start of its definition
   //PartPtr funcStartPart = client->getComposer()->GetFunctionStartPart(func, client);
@@ -382,11 +400,13 @@ void setArgByRef2ParamMap(PartEdgePtr callEdge, SgFunctionCallExp* call,
       itParams!=params->end() && itArgs!=args.end();
       itParams++, itArgs++)
   {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, ("iter", scope::low), 1, partitionsDebugLevel)
     SIGHT_VERB_IF(1, partitionsDebugLevel)
       dbg << "itArgs="<<SgNode2Str(*itArgs)<<endl;
       dbg << "itParams="<<SgNode2Str(*itParams)<<endl;
     SIGHT_VERB_FI()
+#endif
     SgType* typeParam = (*itParams)->get_type();
 
     // Skip "..." types, which are used to specify VarArgs.
@@ -1142,12 +1162,14 @@ std::list<PartEdgePtr> PartEdge::getOperandPartEdge(SgNode* anchor, SgNode* oper
   // The target of this edge identifies the termination point of all the execution prefixes
   // denoted by this edge. We thus use it to query for the parts of the operands and only both
   // if this part is itself live.
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, ("PartEdge::getOperandPartEdge()", scope::medium), 2, partitionsDebugLevel)
   SIGHT_VERB_IF(2, partitionsDebugLevel)
     dbg << "anchor="<<SgNode2Str(anchor)<<" operand="<<SgNode2Str(operand)<<endl;
     dbg << "this PartEdge="<<str()<<endl;
     dbg << "getInputPartEdge()="<<getInputPartEdge()->str()<<endl;
   SIGHT_VERB_FI()
+#endif
 
   std::list<PartEdgePtr> baseEdges = getInputPartEdge()->getOperandPartEdge(anchor, operand);
   // Convert the list of edges into a set for easier/faster lookups
@@ -1155,11 +1177,13 @@ std::list<PartEdgePtr> PartEdge::getOperandPartEdge(SgNode* anchor, SgNode* oper
   for(list<PartEdgePtr>::iterator be=baseEdges.begin(); be!=baseEdges.end(); be++)
     baseEdgesSet.insert(*be);
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(2, partitionsDebugLevel)
     SIGHT_VERB_DECL(scope, ("baseOperandEdges", scope::medium), 2, partitionsDebugLevel)
     for(list<PartEdgePtr>::iterator be=baseEdges.begin(); be!=baseEdges.end(); be++)
       dbg << be->get()->str();
   SIGHT_VERB_FI()
+#endif
 
   /*cout << "------------------------------------"<<endl;
   cout << "analysis="<<getAnalysis()->str()<<endl;
@@ -1543,22 +1567,32 @@ std::list<PartEdgePtr> IntersectionPart::outEdges()
 {
   assert(initialized);
 
+#ifndef DISABLE_SIGHT
   scope s("IntersectionPart::outEdges()");
   dbg << "getInputPart()="<<getInputPart()->str()<<endl;
+#endif
   // For each part in parts, maps the parent part of each outgoing part to the set of parts that share this parent
   map<PartEdgePtr, map<ComposedAnalysis*, set<PartEdgePtr> > > parent2Out;
   for(map<ComposedAnalysis*, PartPtr>::iterator part=parts.begin(); part!=parts.end(); part++) {
+#ifndef DISABLE_SIGHT
     dbg << "part->second="<<part->second->str()<<endl;
+#endif
     // Get this part's outgoing edges
     list<PartEdgePtr> out = part->second->outEdges();
 
     // Group these edges according to their common parent edge
-    { scope s(txt()<<"outEdges #out="<<out.size());
+    {
+#ifndef DISABLE_SIGHT
+      scope s(txt()<<"outEdges #out="<<out.size());
+#endif
     for(list<PartEdgePtr>::iterator e=out.begin(); e!=out.end(); e++) {
+#ifndef DISABLE_SIGHT
       dbg << "        e="<<(*e)->str()<<endl;
       dbg << "        (*e)->getInputPartEdge()="<<(*e)->getInputPartEdge()->str()<<endl;
+#endif
       parent2Out[(*e)->getInputPartEdge()][part->first].insert(*e);
-    } }
+    }
+    }
   }
 
   /*for(map<PartEdgePtr, map<ComposedAnalysis*, set<PartEdgePtr> > >::iterator p=parent2Out.begin(); p!=parent2Out.end(); p++) {
@@ -1574,12 +1608,17 @@ std::list<PartEdgePtr> IntersectionPart::outEdges()
 
   // Create a cross-product of the edges in parent2Out, one parent edge at a time
   std::list<PartEdgePtr> edges;
-  { scope s("Cross-product");
+  {
+#ifndef DISABLE_SIGHT
+    scope s("Cross-product");
+#endif
   for(map<PartEdgePtr, map<ComposedAnalysis*, set<PartEdgePtr> > >::iterator par=parent2Out.begin();
       par!=parent2Out.end(); par++) {
     map<ComposedAnalysis*, PartEdgePtr> outPartEdges;
     assert(par->second.size()!=0);
+#ifndef DISABLE_SIGHT
     dbg << "IntersectionPart::outEdges(): parent = "<<par->first->str()<<endl;
+#endif
     intersectEdges(par->first, par->second.begin(), par->second, outPartEdges, edges, analysis);
   } }
 
@@ -1591,8 +1630,10 @@ std::list<PartEdgePtr> IntersectionPart::outEdges()
   // Cache the outgoing edges in Part2InEdges
   for(std::list<PartEdgePtr>::iterator e=edges.begin(); e!=edges.end(); ++e) {
     Part2InEdges[getAnalysis()][(*e)->target()].insert(*e);
+#ifndef DISABLE_SIGHT
     dbg << "IntersectionPart::outEdges(): #Part2InEdges["<<getAnalysis()->str()<<"]["<<(*e)->target()->str()<<"]="<<Part2InEdges[getAnalysis()][(*e)->target()].size()<<endl;
     dbg << "    "<<(*e)->str()<<endl;
+#endif
   }
 
   return edges;
@@ -1604,8 +1645,10 @@ std::list<PartEdgePtr> IntersectionPart::inEdges()
 {
   assert(initialized);
 
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, ("IntersectionPart::inEdges()"), 2, partitionsDebugLevel)
   SIGHT_VERB(dbg << "#Part2InEdges["<<getAnalysis()->str()<<"]["<<str()<<"]="<<Part2InEdges[getAnalysis()][shared_from_this()].size()<<endl, 2, partitionsDebugLevel)
+#endif
 
   // If we've already cached this Part's incoming edges, return the cached set
   if(Part2InEdges[getAnalysis()].find(shared_from_this()) != Part2InEdges[getAnalysis()].end()) {
@@ -1758,26 +1801,39 @@ set<CFGNode> IntersectionPart::CFGNodes() const {
 // If this Part corresponds to a function call/return, returns the set of Parts that contain
 // its corresponding return/call, respectively.
 set<PartPtr> IntersectionPart::matchingCallParts() const {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, (txt()<<"IntersectionPart::matchingCallParts()"), 1, partitionsDebugLevel)
   SIGHT_VERB(dbg<<"this="<<str()<<endl, 1, partitionsDebugLevel)
+#endif
   assert(initialized);
 
   // Maps inputParts to the parts derived from them by each analysis in the keys of parts.
   // The map associated with each inputPart will induce an IntersectionPart and the set of
   // these IntersectionParts will be returned.
   map<PartPtr, map<ComposedAnalysis*, PartPtr> > allMCParts;
-  {SIGHT_VERB_DECL(scope, ("Computing allMCParts"), 1, partitionsDebugLevel)
+  {
+#ifndef DISABLE_SIGHT
+    SIGHT_VERB_DECL(scope, ("Computing allMCParts"), 1, partitionsDebugLevel)
+#endif
   for(map<ComposedAnalysis*, PartPtr>::const_iterator part=parts.begin(); part!=parts.end(); ++part) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"part="<<part->second->str()), 1, partitionsDebugLevel)
+#endif
     set<PartPtr> matchParts = part->second->matchingCallParts();
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << "#matchParts="<<matchParts.size()<<endl, 1, partitionsDebugLevel)
+#endif
     for(set<PartPtr>::iterator mp=matchParts.begin(); mp!=matchParts.end(); ++mp) {
+#ifndef DISABLE_SIGHT
       dbg << (*mp)->str()<<endl;
+#endif
       assert(allMCParts[(*mp)->getInputPart()].find(part->first) == allMCParts[(*mp)->getInputPart()].end());
       allMCParts[(*mp)->getInputPart()][part->first] = *mp;
     }
   }}
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "#allMCParts="<<allMCParts.size()<<endl, 1, partitionsDebugLevel)
+#endif
 
   // Verify that all the superset parts in allMCParts map the same number of Parts
   unsigned int numMappedParts=0;
@@ -1785,7 +1841,9 @@ set<PartPtr> IntersectionPart::matchingCallParts() const {
     if(mcp==allMCParts.begin()) numMappedParts = mcp->second.size();
     else                        assert(numMappedParts == mcp->second.size());
   }
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "numMappedParts="<<numMappedParts<<endl, 1, partitionsDebugLevel)
+#endif
 
   // The set of IntersectionParts that correspond to the mappes associated with the superset keys in allMCParts
   set<PartPtr> allMCInterParts;
@@ -1794,7 +1852,9 @@ set<PartPtr> IntersectionPart::matchingCallParts() const {
     interPart->init();
     allMCInterParts.insert(interPart);
   }
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "#allMCInterParts="<<allMCInterParts.size()<<endl, 1, partitionsDebugLevel)
+#endif
   return allMCInterParts;
 
 /*  set<PartPtr> matchParts;
@@ -1832,26 +1892,40 @@ set<PartPtr> IntersectionPart::matchingCallParts() const {
 // If this Part corresponds to a function entry/exit, returns the set of Parts that contain
   // its corresponding exit/entry, respectively.
 set<PartPtr> IntersectionPart::matchingEntryExitParts() const {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_DECL(scope, (txt()<<"IntersectionPart::matchingEntryExitParts()"), 1, partitionsDebugLevel)
   SIGHT_VERB(dbg<<"this="<<str()<<endl, 1, partitionsDebugLevel)
+#endif
   assert(initialized);
 
   // Maps inputParts to the parts derived from them by each analysis in the keys of parts.
   // The map associated with each inputPart will induce an IntersectionPart and the set of
   // these IntersectionParts will be returned.
   map<PartPtr, map<ComposedAnalysis*, PartPtr> > allEEParts;
-  {SIGHT_VERB_DECL(scope, ("Computing allEEParts"), 1, partitionsDebugLevel)
+  {
+#ifndef DISABLE_SIGHT
+    SIGHT_VERB_DECL(scope, ("Computing allEEParts"), 1, partitionsDebugLevel)
+#endif
   for(map<ComposedAnalysis*, PartPtr>::const_iterator part=parts.begin(); part!=parts.end(); ++part) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"part="<<part->second->str()), 1, partitionsDebugLevel)
+#endif
     set<PartPtr> matchParts = part->second->matchingEntryExitParts();
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << "#matchParts="<<matchParts.size()<<endl, 1, partitionsDebugLevel)
+#endif
     for(set<PartPtr>::iterator mp=matchParts.begin(); mp!=matchParts.end(); ++mp) {
+#ifndef DISABLE_SIGHT
       dbg << (*mp)->str()<<endl;
+#endif
+
       assert(allEEParts[(*mp)->getInputPart()].find(part->first) == allEEParts[(*mp)->getInputPart()].end());
       allEEParts[(*mp)->getInputPart()][part->first] = *mp;
     }
   }}
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "#allEEParts="<<allEEParts.size()<<endl, 1, partitionsDebugLevel)
+#endif
 
   // Verify that all the superset parts in allEEParts map the same number of Parts
   unsigned int numMappedParts=0;
@@ -1859,7 +1933,9 @@ set<PartPtr> IntersectionPart::matchingEntryExitParts() const {
     if(eep==allEEParts.begin()) numMappedParts = eep->second.size();
     else                        assert(numMappedParts == eep->second.size());
   }
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "numMappedParts="<<numMappedParts<<endl, 1, partitionsDebugLevel)
+#endif
 
   // The set of IntersectionParts that correspond to the mappes associated with the superset keys in allEEParts
   set<PartPtr> allEEInterParts;
@@ -1868,8 +1944,12 @@ set<PartPtr> IntersectionPart::matchingEntryExitParts() const {
     interPart->init();
     allEEInterParts.insert(interPart);
   }
+
+#ifndef DISABLE_SIGHT
   SIGHT_VERB(dbg << "#allEEInterParts="<<allEEInterParts.size()<<endl, 1, partitionsDebugLevel)
-  return allEEInterParts;
+#endif
+
+    return allEEInterParts;
 }
 /*
 // Let A={ set of execution prefixes that terminate at the given anchor SgNode }

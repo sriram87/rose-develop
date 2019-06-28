@@ -1,6 +1,8 @@
 // This file holds the portions of partitions.C that cannot be compiled when sight.h is included
 
 #include "sage3basic.h"
+using namespace std;
+
 #include "abstract_object.h"
 #include "compose.h"
 #include "partitions.h"
@@ -9,7 +11,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/topological_sort.hpp>
 
-using namespace std;
 using namespace boost;
 
 namespace fuse {

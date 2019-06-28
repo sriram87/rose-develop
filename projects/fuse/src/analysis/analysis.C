@@ -1,5 +1,8 @@
 #define ANALYSIS_C
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "VirtualCFGIterator.h"
 #include "cfgUtils.h"
 #include "CallGraphTraverse.h"
@@ -13,8 +16,10 @@
 #include <map>
 #include <boost/make_shared.hpp>
 #include "sight.h"
-using namespace std;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 /* GB 2012-10-23: DESIGN NOTE
  * At the start of an intra-procedural analysis of a given function the function's initial dataflow state is copied
@@ -29,8 +34,6 @@ using namespace sight;
  * on the outgoing edges of the starting Parts / incoming edges of the ending Part one extra step to the incoming
  * edges of the starting Parts / outgoing edges of the ending Parts.
  */
-
-using namespace std;
 
 namespace fuse {
 

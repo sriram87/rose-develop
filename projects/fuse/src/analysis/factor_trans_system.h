@@ -1,5 +1,4 @@
 #pragma once
-
 #include "compose.h"
 #include "composed_analysis.h"
 #include "partitions.h"

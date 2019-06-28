@@ -30,7 +30,7 @@ class HierEdgeMapFunctor {
 };
 
 template <class EdgeTypePtr>
-class HierEdge : public sight::printable {
+class HierEdge : public printable {
   typedef CompSharedPtr<HierEdge<EdgeTypePtr> > HierEdgePtr;
   typedef CompSharedPtr<HierEdge_Leaf<EdgeTypePtr> > HierEdge_LeafPtr;
   
@@ -99,7 +99,7 @@ class HierEdge : public sight::printable {
 };
 
 template <class EdgeTypePtr>
-class HierEdge_Leaf : public sight::printable {
+class HierEdge_Leaf : public printable {
   typedef CompSharedPtr<HierEdge_Leaf<EdgeTypePtr> > HierEdge_LeafPtr;
   
   // Indicates whether during the traversal each leaf edge should be visited just once

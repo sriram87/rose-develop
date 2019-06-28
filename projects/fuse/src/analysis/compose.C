@@ -1,4 +1,7 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "compose.h"
 #include "ssa.h"
 #include "const_prop_analysis.h"
@@ -11,8 +14,9 @@
 #include <set>
 #include <queue>
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 using namespace boost;
 namespace fuse
@@ -371,8 +375,8 @@ ChainComposer::ChainComposer(const list<ComposedAnalysis*>& analyses,
 }
 
 ChainComposer::ChainComposer(const ChainComposer& that) :
-  allAnalyses(allAnalyses), doneAnalyses(doneAnalyses),
-  currentAnalysis(currentAnalysis), testAnalysis(testAnalysis), verboseTest(verboseTest)
+  allAnalyses(that.allAnalyses), doneAnalyses(that.doneAnalyses),
+  currentAnalysis(that.currentAnalysis), testAnalysis(that.testAnalysis), verboseTest(that.verboseTest)
 {}
 
 ChainComposer::~ChainComposer() {
@@ -503,11 +507,13 @@ RetType ChainComposer::callServerAnalysisFunc(
   }*/
 
 
+#ifndef DISABLE_SIGHT
   SIGHT_IF(verbose)
     dbg << "pedge="<<(pedge? pedge->str(): "NULL")<<endl;
     if(client) dbg << "client="<<client->str()<<", tightness="<<(checkTightness(client)==ComposedAnalysis::loose? "loose": "tight")<<endl;
     if(currentAnalysis) dbg << "currentAnalysis="<<currentAnalysis->str()<<", tightness="<<(checkTightness(currentAnalysis)==ComposedAnalysis::loose? "loose": "tight")<<endl;
   SIGHT_FI()
+#endif
 
 /*  // If the current analysis is non-NULL and implements the desired operation tightly, call its implementation
   if(client && checkTightness(client)) {
@@ -632,6 +638,7 @@ UnionRetPtrType ChainComposer::OperandExpr2Any
   // to SgNode n in the given part
   list<PartEdgePtr> opPartEdges = pedge->getOperandPartEdge(n, operand);
   //if(composerDebugLevel()>=2) {
+#ifndef DISABLE_SIGHT
   SIGHT_VERB_IF(2, composerDebugLevel)
     dbg << "opPartEdges(#"<<opPartEdges.size()<<")="<<endl;
     for(list<PartEdgePtr>::iterator opE=opPartEdges.begin(); opE!=opPartEdges.end(); opE++) {
@@ -639,6 +646,7 @@ UnionRetPtrType ChainComposer::OperandExpr2Any
       dbg << (*opE)->str()<<endl;
     }
   SIGHT_VERB_FI()
+#endif
 
   // The MemRegionObjects that represent the operand within different Parts in opParts
   list<RetPtrType > partObjects;
@@ -647,10 +655,12 @@ UnionRetPtrType ChainComposer::OperandExpr2Any
   for(list<PartEdgePtr>::iterator opE=opPartEdges.begin(); opE!=opPartEdges.end(); opE++) {
     RetPtrType p = callOp(*opE, client);
     //if(composerDebugLevel()>=2) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(2, composerDebugLevel)
       dbg << "opE="<<opE->get()->str()<<endl;
       dbg << "p="<<ret2Str(p, "")<<endl;
     SIGHT_VERB_FI()
+#endif
     partObjects.push_back(p);
   }
 
@@ -1394,20 +1404,29 @@ void ChainComposer::runAnalysis()
     (*a)->initAnalysis();
 
     currentAnalysis = *a;
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"ChainComposer Running Analysis "<<i<<": "<<(*a)<<" : "<<(*a)->str(""), scope::high), 1, composerDebugLevel);
+#endif
 
     //if(doneAnalyses.size()>0 && composerDebugLevel()>=1) {
     if(doneAnalyses.size()>0) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_IF(1, composerDebugLevel)
+#endif
       set<PartPtr> startStates = GetStartAStates(currentAnalysis);
-      { scope s("startStates");
-      for(set<PartPtr>::iterator s=startStates.begin(); s!=startStates.end(); ++s)
-        dbg << (*s? (*s)->str(): "NULL")<<endl;
+#ifndef DISABLE_SIGHT
+      {
+        scope s("startStates");
+        for(set<PartPtr>::iterator s=startStates.begin(); s!=startStates.end(); ++s)
+          dbg << (*s? (*s)->str(): "NULL")<<endl;
       }
+#endif
       set<PartPtr> endStates   = GetEndAStates(currentAnalysis);
       ostringstream fName; fName << "ats." << i << "." << doneAnalyses.back()->str();
       ats2dot(fName.str(), "ATS", startStates, endStates);
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_FI()
+#endif
 //      ats2dot_bw(fName.str()+".BW", "ATS", startStates, endStates);
 
       cout << "Analysis "<<currentAnalysis->str()<<endl;
@@ -1463,6 +1482,7 @@ void ChainComposer::runAnalysis()
 
     //if(doneAnalyses.size()>1 && composerDebugLevel()>=1) {
     if(doneAnalyses.size()>1) {
+#ifndef DISABLE_SIGHT      
       SIGHT_VERB_IF(1, composerDebugLevel)
       set<PartPtr> startStates = GetStartAStates(doneAnalyses.back());
       dbg << "ChainComposer::runAnalysis() #startStates="<<startStates.size()<<endl;
@@ -1471,6 +1491,7 @@ void ChainComposer::runAnalysis()
       ats2dot(fName.str(), "ATS", startStates, endStates);
 //      ats2dot_bw(fName.str()+".BW", "ATS", startStates, endStates);
       SIGHT_VERB_FI()
+#endif
     }
 
     /*list<string> contextAttrs;
@@ -1872,11 +1893,15 @@ void LooseParallelComposer::runAnalysis()
   int i=1;
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++, i++) {
     //scope reg(txt()<< "LooseParallelComposer Running Analysis "<<i<<": "<<(*a)->str(""), scope::high, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<< "LooseParallelComposer Running Analysis "<<i<<": "<<(*a)->str(""), scope::high), 1, composerDebugLevel);
+#endif
 
     (*a)->runAnalysis();
 
+#ifndef DISABLE_SIGHT
     dbg << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Analysis finished" << endl;
+#endif
 
     /*if(composerDebugLevel() >= 3) {
       scope reg(Final State", scope::medium, attrGE("composerDebugLevel", 3));
@@ -1908,15 +1933,21 @@ ValueObjectPtr   LooseParallelComposer::Expr2Val(SgNode* n, PartEdgePtr pedge)
 
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++) {
     //scope reg(txt()<<"Expr2Val  : " << (*a)->str(""), scope::medium, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"Expr2Val  : " << (*a)->str(""), scope::medium), 1, composerDebugLevel)
+#endif
 
     try {
       ValueObjectPtr val = (*a)->Expr2Val(n, getEdgeForAnalysis(pedge, *a));
+#ifndef DISABLE_SIGHT
       dbg << "Returning "<<val->str("")<<endl;
+#endif
       vals.push_back(val);
     } catch (NotImplementedException exc) {
       //if(composerDebugLevel()>=1) dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2Val() Not Implemented."<<endl;
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2Val() Not Implemented."<<endl, 1, composerDebugLevel)
+#endif
       // If control reaches here then the current analysis must not implement
       // this method so we ask the remaining analyses
       continue;
@@ -1937,14 +1968,18 @@ CodeLocObjectPtr LooseParallelComposer::Expr2CodeLoc(SgNode* n, PartEdgePtr pedg
 
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++) {
     //scope reg(txt()<<"Expr2CodeLoc  : " << (*a)->str(""), scope::medium, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"Expr2CodeLoc  : " << (*a)->str(""), scope::medium), 1, composerDebugLevel)
+#endif
 
     try {
       CodeLocObjectPtr cl = (*a)->Expr2CodeLoc(n, getEdgeForAnalysis(pedge, *a));
       SIGHT_VERB(dbg << "Returning "<<cl->str("")<<endl, 1, composerDebugLevel)
       cls.push_back(cl);
     } catch (NotImplementedException exc) {
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2CodeLoc() Not Implemented."<<endl, 1, composerDebugLevel)
+#endif
       // If control reaches here then the current analysis must not implement
       // this method so we ask the remaining analyses
       continue;
@@ -1966,16 +2001,22 @@ MemRegionObjectPtr  LooseParallelComposer::Expr2MemRegion(SgNode* n, PartEdgePtr
 
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++) {
     //scope reg(txt()<<"Expr2MemRegion  : " << (*a)->str(""), scope::medium, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"Expr2MemRegion  : " << (*a)->str(""), scope::medium), 1, composerDebugLevel)
+#endif
 
     try {
       MemRegionObjectPtr mr = (*a)->Expr2MemRegion(n, getEdgeForAnalysis(pedge, *a));
       //if(composerDebugLevel() >= 1) { dbg << "Returning "<<mr->str("")<<endl; }
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "Returning "<<mr->str("")<<endl, 1, composerDebugLevel)
+#endif
       mrs.push_back(mr);
     } catch (NotImplementedException exc) {
       //if(composerDebugLevel()>=1) dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2MemRegion() Not Implemented."<<endl;
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2MemRegion() Not Implemented."<<endl, 1, composerDebugLevel)
+#endif
       // If control reaches here then the current analysis must not implement
       // this method so we ask the remaining analyses
       continue;
@@ -1994,16 +2035,22 @@ MemLocObjectPtr  LooseParallelComposer::Expr2MemLoc(SgNode* n, PartEdgePtr pedge
 
   for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++) {
     //scope reg(txt()<<"Expr2MemLoc  : " << (*a)->str(""), scope::medium, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_DECL(scope, (txt()<<"Expr2MemLoc  : " << (*a)->str(""), scope::medium), 1, composerDebugLevel)
+#endif
 
     try {
       MemLocObjectPtr ml = (*a)->Expr2MemLoc(n, getEdgeForAnalysis(pedge, *a));
       //if(composerDebugLevel() >= 1) { dbg << "Returning "<<ml->str("")<<endl; }
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "Returning "<<ml->str("")<<endl, 1, composerDebugLevel)
+#endif
       mls.push_back(ml);
     } catch (NotImplementedException exc) {
       //if(composerDebugLevel()>=1) dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2MemLoc() Not Implemented."<<endl;
+#ifndef DISABLE_SIGHT
       SIGHT_VERB(dbg << "&nbsp;&nbsp;&nbsp;&nbsp;Expr2MemLoc() Not Implemented."<<endl, 1, composerDebugLevel)
+#endif
       // If control reaches here then the current analysis must not implement
       // this method so we ask the remaining analyses
       continue;
@@ -2188,7 +2235,9 @@ set<PartPtr> LooseParallelComposer::GetStartOrEndAStates_Spec(callStartOrEndASta
   if(subAnalysesImplementPartitions==True || subAnalysesImplementPartitions==Unknown) {
     for(list<ComposedAnalysis*>::iterator a=allAnalyses.begin(); a!=allAnalyses.end(); a++) {
       //scope reg(txt()<<funcName<<"  : " << (*a)->str(""), scope::medium, attrGE("composerDebugLevel", 1));
+#ifndef DISABLE_SIGHT
       SIGHT_VERB_DECL(scope, (txt()<<funcName<<"  : " << (*a)->str(""), scope::medium), 1, composerDebugLevel)
+#endif
 
       try {
         //set<PartPtr> curParts = (*a)->GetEndAStates();
@@ -2234,7 +2283,9 @@ set<PartPtr> LooseParallelComposer::GetStartOrEndAStates_Spec(callStartOrEndASta
         }
       } catch (NotImplementedException exc) {
         //if(composerDebugLevel()>=1) dbg << "&nbsp;&nbsp;&nbsp;&nbsp;"<<funcName<<"() Not Implemented."<<endl;
+#ifndef DISABLE_SIGHT
         SIGHT_VERB(dbg << "&nbsp;&nbsp;&nbsp;&nbsp;"<<funcName<<"() Not Implemented."<<endl, 1, composerDebugLevel)
+#endif
         // If control reaches here then the current analysis must not implement
         // this method so we ask the remaining analyses
         continue;
@@ -2255,6 +2306,7 @@ set<PartPtr> LooseParallelComposer::GetStartOrEndAStates_Spec(callStartOrEndASta
     assert(intersection.size()>0);
 
     //if(composerDebugLevel() >= 1) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(1, composerDebugLevel)
       dbg << "Returning ";
       for(map<PartPtr, map<ComposedAnalysis*, PartPtr> >::iterator i=intersection.begin(); i!=intersection.end(); i++) {
@@ -2266,6 +2318,7 @@ set<PartPtr> LooseParallelComposer::GetStartOrEndAStates_Spec(callStartOrEndASta
         }
       }
     SIGHT_VERB_FI()
+#endif
 
     // Convert all the Parts in parts into IntersectionParts to match the result of
     set<PartPtr> interParts;

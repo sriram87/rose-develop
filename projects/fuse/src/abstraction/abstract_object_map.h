@@ -508,7 +508,9 @@ namespace fuse {
       // This is the case if all the values in its sub-tree denote the empty set
       bool isEmptyVal(PartEdgePtr pedge, Composer* comp, ComposedAnalysis* analysis) const;
 
+#ifndef DISABLE_SIGHT
       SightStream& print(SightStream& s) const;
+#endif
     }; // class Node
     static HierarchicalAOM::NodePtr NULLNode;
     

@@ -1,10 +1,13 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "abstract_object_set.h"
 #include <ostream>
 #include <typeinfo>
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse
 {  
@@ -114,10 +117,12 @@ bool AbstractObjectSet::remove(const AbstractObjectPtr that)
     if(!found) {
         //try {
         SIGHT_VERB_IF(1, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
           dbg << "<b>AbstractObjectSet::remove()"<<endl;
           indent ind;
           dbg << "Cannot find "<<that->str("")<<endl;
           dbg << str("&nbsp;&nbsp;&nbsp;&nbsp;")<<"</b>"<<endl;
+#endif
         SIGHT_VERB_FI()
         // throw "element not found";
     }
@@ -172,8 +177,10 @@ bool AbstractObjectSet::containsEqualSet(const AbstractObjectPtr that)
   std::list<AbstractObjectPtr>::iterator it = items.begin();
   for( ; it != items.end(); it++) {
     SIGHT_VERB_IF(1, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "it="<<(*it)->str()<<endl;
       dbg << "equalSet="<<(*it)->equalSet(that, latPEdge, comp, analysis)<<endl;
+#endif
     SIGHT_VERB_FI()
     if((*it)->equalSet(that, latPEdge, comp, analysis)) {
       retval = true;
@@ -315,6 +322,7 @@ Lattice* AbstractObjectSet::remapML(const std::set<MLMapping>& ml2ml, PartEdgePt
   /*dbg << "latPEdge="<<latPEdge->str()<<endl;
   dbg << "getPartEdge()="<<getPartEdge()->str()<<endl;*/
   SIGHT_VERB_IF(1, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
     // If either the key or the value of this mapping is dead within its respective part, we skip it.
     // Print notices of this skipping once
     for(std::set<MLMapping>::const_iterator m=ml2ml.begin(); m!=ml2ml.end(); m++) {
@@ -323,17 +331,20 @@ Lattice* AbstractObjectSet::remapML(const std::set<MLMapping>& ml2ml, PartEdgePt
       if(!m->from->isLive(fromPEdge, comp, analysis) || (m->to && !m->to->isLive(latPEdge, comp, analysis)))
         dbg << "AbstractObjectSet::remapML() WARNING: Skipping dead ml2ml mapping "<<m->from->strp(fromPEdge)<<"(live="<<m->from->isLive(fromPEdge, comp, analysis)<<") =&gt; "<<(m->to ? m->to->strp(latPEdge) : "NULL")<<"(live="<<(m->to ? m->to->isLive(latPEdge, comp, analysis) : -1)<<")"<<endl;
     }
+  #endif
   SIGHT_VERB_FI()
   
   SIGHT_VERB2(scope reg("AbstractObjectSet::remapML", scope::medium), 1, AbstractObjectSetDebugLevel)
   
   SIGHT_VERB_IF(1, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "AbstractObjectSet::remapML"<<endl;
     for(std::set<MLMapping>::const_iterator m=ml2ml.begin(); m!=ml2ml.end(); m++) {
       if(!m->from) continue;
       dbg << m->from.get()->str() << " =&gt; " << (m->to? m->to.get()->strp(latPEdge): "NULL") << endl;
     }
     dbg << "this="<<str()<<endl;
+#endif
   SIGHT_VERB_FI()
   
   AbstractObjectSet* newS = new AbstractObjectSet(latPEdge, comp, analysis, mode);
@@ -351,8 +362,10 @@ Lattice* AbstractObjectSet::remapML(const std::set<MLMapping>& ml2ml, PartEdgePt
       if(!m->from) continue;
       SIGHT_VERB2(scope regM(txt() << "m="<<m->str(), scope::low), 2, AbstractObjectSetDebugLevel)
       SIGHT_VERB_IF(2, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "m->from->isLive = "<<m->from->isLive(fromPEdge, comp, analysis)<<endl;
         dbg << "m->to->isLive = "<<(m->to? m->to->isLive(latPEdge, comp, analysis): -1)<<endl;
+#endif
       SIGHT_VERB_FI()
       // If either the key or the value of this mapping is dead within its respective part, skip it
       if(!m->from->isLive(fromPEdge, comp, analysis) || (m->to && !m->to->isLive(latPEdge, comp, analysis))) continue;
@@ -429,10 +442,12 @@ bool AbstractObjectSet::unionIntersectUpdate(Lattice* thatL, uiType ui)
     SIGHT_VERB2(scope reg(txt()<<"AbstractObjectSet::meetUpdate("<<(mode==may? "may": "must")<<", ui="<<(ui==Union?"Union":"Intersection")<<")", scope::medium), 2, AbstractObjectSetDebugLevel)
     AbstractObjectSet *that = dynamic_cast <AbstractObjectSet*> (thatL);
     SIGHT_VERB_IF(2, AbstractObjectSetDebugLevel)
+#ifndef DISABLE_SIGHT
       { scope thisScope("this", scope::low);
       dbg << str()<<endl; }
       { scope thisScope("that", scope::low);
       dbg << that->str()<<endl; }
+#endif
     SIGHT_VERB_FI()
     if(ui == Union) {
       if(isFull()) return false;

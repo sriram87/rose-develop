@@ -1,11 +1,17 @@
 #include "sage3basic.h"
-#include "abstract_object.h"
-#include <iostream>
 #include "sight.h"
-#include "compose.h"
 
 using namespace std;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
+
+#include "abstract_object.h"
+#include <iostream>
+
+#include "compose.h"
+
 
 namespace fuse {
 
@@ -317,10 +323,12 @@ AbstractionHierarchy::IntersectHierKey::IntersectHierKey(const std::list<hierKey
   vector<list<comparablePtr>::const_iterator> curSubKeyList;
   vector<list<comparablePtr>::const_iterator> endSubKeyList;
 
+#ifndef DISABLE_SIGHT
   scope s("AbstractionHierarchy::IntersectHierKey::IntersectHierKey");
   for (list<hierKeyPtr>::const_iterator cur = subKeys.begin(); cur != subKeys.end(); ++cur) {
     dbg << *cur << endl;
   }
+#endif
 
   // Initialize curSubKeyList/endSubKeyList to point to the start/end of the keyLists of all the subKeys and
   // compute their maximum length
@@ -343,7 +351,9 @@ AbstractionHierarchy::IntersectHierKey::IntersectHierKey(const std::list<hierKey
   // Iterate over all the subKeys and find the common hierarchy among them or detect
   // the difference among the hierarchies.
   for (unsigned int i = 0; i < maxLength; ++i) {
+#ifndef DISABLE_SIGHT
     dbg << i << ":" << endl;
+#endif
     IntersectComparablePtr intersectComp = makePtr<IntersectComparable>();
     for (unsigned int j = 0; j < curSubKeyList.size(); ++j) {
       // If we haven't yet reached the end of the current subKey
@@ -365,7 +375,9 @@ AbstractionHierarchy::IntersectHierKey::IntersectHierKey(const std::list<hierKey
         keyList.push_back(*curSubKeyList[j]);*/
 
         intersectComp->add(*curSubKeyList[j]);
+#ifndef DISABLE_SIGHT
         dbg << "Pushing "<<(*curSubKeyList[j])->str()<<endl;
+#endif
 
         // Advance the current iterator
         ++curSubKeyList[j];
@@ -393,8 +405,10 @@ AbstractionHierarchy::IntersectHierKey::IntersectHierKey(const std::list<hierKey
     endOfHierarchy = endOfHierarchy && (*cur)->endOfHierarchy;
   }
 
+#ifndef DISABLE_SIGHT
   ostringstream oss; oss << "this="<<((hierKey*)this)<<endl;
   dbg << oss.str();
+#endif
 }
 
 // Returns whether the set denoted by key is live at the given PartEdge
@@ -421,10 +435,12 @@ AbstractionHierarchy::IntersectMappedHierKey<Key>::IntersectMappedHierKey
   vector<list<comparablePtr>::const_iterator> curSubKeyList;
   vector<list<comparablePtr>::const_iterator> endSubKeyList;
 
+#ifndef DISABLE_SIGHT
   scope s("AbstractionHierarchy::IntersectMappedHierKey::IntersectMappedHierKey");
   for (typename std::map<Key, hierKeyPtr>::const_iterator cur = subKeys.begin(); cur != subKeys.end(); ++cur) {
     dbg << cur->first->str() << ": "<<cur->second << endl;
   }
+#endif
 
   // Initialize KeyInSubKey, curSubKeyList end SubKeyList to point to the start/end of the keyLists of all the
   // subKeys and compute their maximum length
@@ -444,7 +460,9 @@ AbstractionHierarchy::IntersectMappedHierKey<Key>::IntersectMappedHierKey
   // Iterate over all the subKeys and find the common hierarchy among them or detect
   // the difference among the hierarchies.
   for (unsigned int i = 0; i < maxLength; ++i) {
+#ifndef DISABLE_SIGHT
     dbg << i << ":" << endl;
+#endif
     CompSharedPtr<IntersectMappedComparable<Key> > intersectComp = makePtr<IntersectMappedComparable<Key> >();
     for (unsigned int j = 0; j < curSubKeyList.size(); ++j) {
       // If we haven't yet reached the end of the current subKey
@@ -466,7 +484,9 @@ AbstractionHierarchy::IntersectMappedHierKey<Key>::IntersectMappedHierKey
         keyList.push_back(*curSubKeyList[j]);*/
 
         intersectComp->add(KeyInSubKey[j], *curSubKeyList[j]);
+#ifndef DISABLE_SIGHT
         dbg << "Pushing "<<(*curSubKeyList[j])->str()<<endl;
+#endif
 
         // Advance the current iterator
         ++curSubKeyList[j];
@@ -494,8 +514,10 @@ AbstractionHierarchy::IntersectMappedHierKey<Key>::IntersectMappedHierKey
     endOfHierarchy = endOfHierarchy && cur->second->endOfHierarchy;
   }
 
+#ifndef DISABLE_SIGHT
   ostringstream oss; oss << "this="<<((hierKey*)this)<<endl;
   dbg << oss.str();
+#endif
 }
 
 // Returns whether the set denoted by key is live at the given PartEdge
@@ -1561,7 +1583,9 @@ MAOMapPtr MappedAbstractObject<Key, KeyIsComposedAnalysis, AOSubType, AOSubTypeP
 // AbstractObject values and maps focused on Lattices will have Lattice values.
 template<class Key, bool KeyIsComposedAnalysis, class AOSubType, class AOSubTypePtr, AbstractObject::AOType type, class MappedAOSubType>
 AbstractionPtr MappedAbstractObject<Key, KeyIsComposedAnalysis, AOSubType, AOSubTypePtr, type, MappedAOSubType>::ConcreteMAOMap::getMappedObj(uiType ui) {
+#ifndef DISABLE_SIGHT
   scope s("MappedAbstractObject<Key, KeyIsComposedAnalysis, AOSubType, AOSubTypePtr, type, MappedAOSubType>::ConcreteMAOMap::getMappedObj(uiType ui)");
+#endif
   // Convert data, which maps Keys to void pointers into a map where AOSubType pointers are values
   map<Key, AOSubTypePtr > aoMap;
   for(typename map<Key, boost::shared_ptr<void> >::iterator dIter=data.begin(); dIter!=data.end(); ++dIter) {
@@ -1569,8 +1593,9 @@ AbstractionPtr MappedAbstractObject<Key, KeyIsComposedAnalysis, AOSubType, AOSub
     assert(val);
     aoMap[dIter->first] = val;
   }
-
+#ifndef DISABLE_SIGHT
   dbg << "#aoMap="<<aoMap.size()<<endl;
+#endif
   return boost::make_shared<MappedAOSubType>(ui, 0, parent->analysis, aoMap);
 }
 
@@ -2487,7 +2512,9 @@ bool ValueObject::SgValue2Bool(boost::shared_ptr<SgValueExp> val) {
   else if (isSgWcharVal(val.get()))
     return isSgWcharVal(val.get())->get_valueUL();
   else {
+#ifndef DISABLE_SIGHT
     dbg << "val=" << SgNode2Str(val.get()) << endl;
+#endif
     assert(0);
   }
 }
@@ -2722,7 +2749,9 @@ set<boost::shared_ptr<SgValueExp> > MappedValueObject<Key, KeyIsComposedAnalysis
         for (; c_it != concreteVals.end(); ++c_it) {
           // If we've found the same value, increment its counter
           if (ValueObject::equalValueExp(c_it->first.get(), (*s_it).get())) {
+#ifndef DISABLE_SIGHT
             indent ind;
+#endif
             c_it->second++;
             //dbg << "found, count="<<c_it->second<<endl;
             break;
@@ -4489,9 +4518,11 @@ bool PartEdgeUnionMemLocObject::isDisjoint() const
 //std::string IndexVector::str(const string& indent)
 // pretty print for the object
 std::string IndexVector::str(std::string indent) const {
+#ifndef DISABLE_SIGHT
   dbg
       << "Error. Direct call to base class (IndexVector)'s str() is not allowed."
       << endl;
+#endif
   //assert (false);
   return "";
 }

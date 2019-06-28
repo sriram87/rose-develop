@@ -52,8 +52,10 @@ class VariableStateTransfer : public DFTransferVisitor
   LatticePtr getLatticeOperand(SgNode *sgn, SgExpression* operand) {
     SIGHT_VERB_DECL(scope, ("VariableStateTransfer::getLatticeOperand()", scope::medium), 1, dLevel)
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
       dbg << "sgn="<<SgNode2Str(sgn)<<endl;
       dbg << "operand="<<SgNode2Str(operand)<<endl;
+#endif
     SIGHT_VERB_FI()
 
     assert(sgn);
@@ -110,10 +112,12 @@ class VariableStateTransfer : public DFTransferVisitor
     //MemLocObjectPtr p = composer->Expr2MemLoc(sgn, part->inEdgeFromAny(), analysis);
     MemLocObjectPtr p = analysis->Expr2MemLocDef(sgn, parts.NodeState()->inEdgeFromAny());
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
       scope s("setLattice()");
       dbg << "edge="<<parts.NodeState()->inEdgeFromAny()->str()<<endl;
       dbg << "p="<<p->strp(parts.NodeState()->inEdgeFromAny(), "&nbsp;&nbsp;&nbsp;&nbsp;")<<endl;
       dbg << "lat="<<lat->str()<<endl;
+#endif
     SIGHT_VERB_FI()
 
     setLattice(p, lat);
@@ -127,10 +131,12 @@ class VariableStateTransfer : public DFTransferVisitor
     //MemLocObjectPtr p = composer->OperandExpr2MemLoc(sgn, operand, part->inEdgeFromAny(), analysis);
     MemLocObjectPtr p = analysis->OperandExpr2MemLocDef(sgn, operand, parts.NodeState()->inEdgeFromAny());
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
           scope s(sight::txt()<<"setLatticeOperand("<<SgNode2Str(operand)<<")");
           dbg << "edge="<<parts.NodeState()->inEdgeFromAny()->str()<<endl;
           dbg << "p="<<p->strp(parts.NodeState()->inEdgeFromAny(), "&nbsp;&nbsp;&nbsp;&nbsp;")<<endl;
           dbg << "lat="<<lat->str()<<endl;
+#endif
         SIGHT_VERB_FI()
 
     setLattice(p, lat);
@@ -229,9 +235,11 @@ public:
     getLattices(sgn, lhsLat, rhsLat);//, resLat);
 
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
       //dbg << "resLat=\n"; { indent ind; dbg << resLat->str("")<<"\n";}
       dbg << "lhsLat=\n"; { indent ind; dbg << (lhsLat?lhsLat->str(""):"NULL")<<"\n";}
       dbg << "rhsLat=\n"; { indent ind; dbg << (rhsLat?rhsLat->str(""):"NULL")<<"\n"; }
+#endif
     SIGHT_VERB_FI()
 
     // Copy the lattice of the right-hand-side to both the left-hand-side variable and to the assignment expression itself
@@ -248,8 +256,10 @@ public:
     //LatticePtr resLat  = getLattice(sgn);
 
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
       dbg << "asgnLat="; { indent ind; dbg << asgnLat->str("")<<"\n"; }
       //dbg << "resLat=";  { indent ind; dbg << resLat->str("") <<"\n"; }
+#endif
     SIGHT_VERB_FI()
 
     setLattice(sgn, asgnLat);
@@ -369,8 +379,10 @@ public:
     SIGHT_VERB(dbg << "Getting p="<<p->str("")<<endl, 1, dLevel)
     dataLat = getLattice(AbstractObjectPtr(p));
     SIGHT_VERB_IF(1, dLevel)
+#ifndef DISABLE_SIGHT
       dbg << "Setting p="<<p->str("")<<endl;
       dbg << "to lat="<<dataLat->str("")<<endl;
+#endif
     SIGHT_VERB_FI()
     setLattice(AbstractObjectPtr(p), dataLat);
     modified = true;

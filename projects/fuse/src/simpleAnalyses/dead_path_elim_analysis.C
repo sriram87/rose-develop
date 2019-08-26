@@ -1,14 +1,17 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "dead_path_elim_analysis.h"
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse {
 
 #define DPEAnalDebugLevel 0
 #if DPEAnalDebugDevel==0
-  #define DISABLE_SIGHT
+  //  #define DISABLE_SIGHT
 #endif
 
 std::string DPELevel2Str(enum DPELevel level) {
@@ -99,9 +102,11 @@ list<PartEdgePtr> DeadPathElimPart::outEdges()
     }
 
     SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "Cached: "<<endl;
     for(list<PartEdgePtr>::iterator e=cache_outEdges.begin(); e!=cache_outEdges.end(); ++e)
       dbg << e->str()<<endl;
+#endif
     SIGHT_VERB_FI()
 
 
@@ -109,9 +114,11 @@ list<PartEdgePtr> DeadPathElimPart::outEdges()
   } else {
   //SIGHT_VERB(dbg<<"#cache_outEdges="<<cache_outEdges.size()<<endl, 2, DPEAnalDebugLevel)
     SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "Cached: "<<endl;
     for(list<PartEdgePtr>::iterator e=cache_outEdges.begin(); e!=cache_outEdges.end(); ++e)
       dbg << e->str()<<endl;
+#endif
     SIGHT_VERB_FI()
   }
   return cache_outEdges;
@@ -137,8 +144,10 @@ list<PartEdgePtr> DeadPathElimPart::inEdges()
       SIGHT_VERB(dbg << "edge->NodeState()="<<edge->NodeState()->str()<<endl, 2, DPEAnalDebugLevel)
       NodeState* inState = NodeState::getNodeState(analysis, edge->NodeState()->source());
       SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
       scope inscope("inState", scope::low);
       dbg << inState->str()<<endl;
+#endif
       SIGHT_VERB_FI()
       DeadPathElimPartEdge* inPartEdge = dynamic_cast<DeadPathElimPartEdge*>(inState->getLatticeBelow(analysis, edge->index(), 0));
       assert(inPartEdge);
@@ -326,8 +335,10 @@ DeadPathElimPartEdge::DeadPathElimPartEdge(PartEdgePtr NodeStateLocPartEdge, Par
     { dbg << (*e)->str()<<endl; }*/
 
     SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "source state="<<endl<<"        "<<state->str(analysis, "        ")<<endl;
       dbg << "getInputPartEdge()="<<getInputPartEdge()->str("        ")<<endl;
+#endif
     SIGHT_VERB_FI()
     // Get the DeadPathElimPartEdge that is stored along getNodeStateLocPartEdge() at the NodeState of its source part
     AnalysisPartEdges pedges = getAnalysis()->NodeState2All(getNodeStateLocPartEdge());
@@ -471,6 +482,7 @@ std::list<PartEdgePtr> DeadPathElimPartEdge::getOperandPartEdge(SgNode* anchor, 
       SIGHT_VERB(dbg << "getInputPartEdge="<<getInputPartEdge()->str()<<endl, 1, DPEAnalDebugLevel)
       std::list<PartEdgePtr> inputEdges = getInputPartEdge()->getOperandPartEdge(anchor, operand);
       if(atsLocEdges.size() != inputEdges.size()) {
+#ifndef DISABLE_SIGHT
         dbg << "ERROR: #atsLocEdge("<<atsLocEdges.size()<<") != #inputEdges("<<inputEdges.size()<<")"<<endl;
         { scope s("atsLocEdges");
         for(list<PartEdgePtr>::iterator e=atsLocEdges.begin(); e!=atsLocEdges.end(); ++e)
@@ -478,6 +490,7 @@ std::list<PartEdgePtr> DeadPathElimPartEdge::getOperandPartEdge(SgNode* anchor, 
         { scope s("inputEdges");
           for(list<PartEdgePtr>::iterator e=inputEdges.begin(); e!=inputEdges.end(); ++e)
             dbg << (*e)->str()<<endl; }
+#endif
 
         cerr << "ERROR: #atsLocEdge("<<atsLocEdges.size()<<") != #inputEdges("<<inputEdges.size()<<")"<<endl;
         { cerr << "atsLocEdges"<<endl;
@@ -494,8 +507,10 @@ std::list<PartEdgePtr> DeadPathElimPartEdge::getOperandPartEdge(SgNode* anchor, 
         SIGHT_VERB(dbg << "atsLocE="<<(*atsLocE)->str()<<endl, 1, DPEAnalDebugLevel)
         PartEdgePtr dpeEdge = DeadPathElimPartEdge::create(*atsLocE, *inputE, analysis);
         SIGHT_VERB_IF(1, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
         scope reg("dpeEdge", scope::low);
         dbg<<dpeEdge->str()<<endl;
+#endif
         SIGHT_VERB_FI()
         cache_getOperandPartEdge[anchor][operand].push_back(dpeEdge);
       }
@@ -855,10 +870,12 @@ void DeadPathElimTransfer::visit2OutNode(SgNode* sgn, ValueObjectPtr val, maymus
       for(AnalysisPartEdgeLists::iterator edge=outE.begin(); edge!=outE.end(); ++edge) {
         std::map<CFGNode, boost::shared_ptr<SgValueExp> > pv = edge->input()->getPredicateValue();
         SIGHT_VERB_IF(1, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
           dbg << "e="<<edge->input()->str()<<endl;
           dbg << "cn="<<CFGNode2Str(cn)<<" pv="<<endl;
           for(map<CFGNode, boost::shared_ptr<SgValueExp> >::iterator v=pv.begin(); v!=pv.end(); v++)
           { indent ind; dbg << CFGNode2Str(v->first) << "("<<(v->first==cn)<<"|"<<(v->first.getNode()==cn.getNode())<<") =&gt; "<<SgNode2Str(v->second.get())<<endl; }
+#endif
         SIGHT_VERB_FI()
 
         assert(pv.find(cn) != pv.end());
@@ -925,7 +942,9 @@ void DeadPathElimTransfer::visit(SgIfStmt *sgn)
 {
   SIGHT_VERB(dbg << "DeadPathElimTransfer::visit(SgIfStmt), conditional="<<SgNode2Str(sgn->get_conditional())<<" isSgExprStmt="<<isSgExprStatement(sgn->get_conditional())<<endl, 1, DPEAnalDebugLevel)
   if(SgExprStatement* es=isSgExprStatement(sgn->get_conditional())) {
+#ifndef DISABLE_SIGHT
     indent ind;
+#endif
     // Get the value of the predicate test in the SgIfStmt's conditional
     ValueObjectPtr val = dpea->getComposer()->OperandExpr2Val(sgn, es->get_expression(), parts.NodeState()->inEdgeFromAny(), dpea);
     visit2OutNode(sgn, val, must, must);
@@ -991,7 +1010,9 @@ void DeadPathElimTransfer::visit(SgNode *sgn)
 
   for(AnalysisPartEdgeLists::iterator edge=outE.begin(); edge!=outE.end(); ++edge) {
     SIGHT_VERB_IF(1, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "e="<<edge->input()->str()<<endl;
+#endif
     SIGHT_VERB_FI()
 
     // Create a DeadPathElimPartEdge to this server analysis-implemented edge
@@ -1070,8 +1091,10 @@ set<PartPtr> DeadPathElimAnalysis::GetStartAStates_Spec()
     for(set<PartPtr>::iterator baseSPart=baseStartParts.begin(); baseSPart!=baseStartParts.end(); baseSPart++) {
       //NodeState* startState = NodeState::getNodeState(this, *baseSPart);
       SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "startPart = "<<baseSPart->get()->str()<<endl;
       //  dbg << "startState = "<<startState->str(this)<<endl;
+#endif
       SIGHT_VERB_FI()
 
       //#SA: dfInfo is aggregated on inEdgeFromAny
@@ -1092,8 +1115,10 @@ set<PartPtr> DeadPathElimAnalysis::GetEndAStates_Spec()
     for(set<PartPtr>::iterator baseEPart=endParts.begin(); baseEPart!=endParts.end(); baseEPart++) {
       //NodeState* endState = NodeState::getNodeState(this, *baseEPart);
       SIGHT_VERB_IF(2, DPEAnalDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "endPart = "<<baseEPart->get()->str()<<endl;
         //dbg << "endState = "<<endState->str(this)<<endl;
+#endif
       SIGHT_VERB_FI()
       //#SA: dfInfo is aggregated on inEdgeFromAny
 /*      DeadPathElimPartEdge* endDPEPartEdge = dynamic_cast<DeadPathElimPartEdge*>(endState->getLatticeAbove(this, (baseEPart->get())->inEdgeFromAny(), 0));

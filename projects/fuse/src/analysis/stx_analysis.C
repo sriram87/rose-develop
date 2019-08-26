@@ -321,6 +321,7 @@ void init_func2AllCalls()
     NodeQuery::querySubTree(SageInterface::getProject(), func2AllCallsFunctor());
     func2AllCalls_initialized=true;
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(3, stxAnalysisDebugLevel)
       scope reg("func2AllCalls", scope::medium);
       for(map<Function, set<SgFunctionCallExp*> >::iterator i=func2AllCalls.begin(); i!=func2AllCalls.end(); i++) {
@@ -330,6 +331,7 @@ void init_func2AllCalls()
           dbg << SgNode2Str(*j) << endl;
       }
     SIGHT_VERB_FI()
+#endif
   }
 }
 
@@ -482,10 +484,12 @@ void SyntacticAnalysis::initGlobalDeclarations() {
 
         if(isSgVariableDeclaration(*d)) {
           //dbg << "definition: "<<(isSgVariableDeclaration(*d)->get_definition()? SgNode2Str(isSgVariableDeclaration(*d)->get_definition()): "NULL")<<endl;
+#ifndef DISABLE_SIGHT
           SIGHT_VERB_IF(3, stxAnalysisDebugLevel)
             dbg << "begin="<<CFGNode2Str((*d)->cfgForBeginning())<<endl;
             dbg << "end="<<CFGNode2Str((*d)->cfgForEnd())<<endl;
           SIGHT_VERB_FI()
+#endif
           globalDeclarations.insert(isSgVariableDeclaration(*d));
         }
       }
@@ -860,6 +864,7 @@ map<StxPartEdgePtr, bool> StxPart::getOutEdges()
   } else if((call = isSgFunctionCallExp(n.getNode())) && n.getIndex()==2) {
     set<Function> callees = getAllCalleeFuncs(call);
 
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(2, stxAnalysisDebugLevel)
       dbg << "type = "<<SgNode2Str(isSgFunctionCallExp(n.getNode())->get_type())<<", funcCall->get_function()="<<(isSgFunctionCallExp(n.getNode())->get_function()? SgNode2Str(isSgFunctionCallExp(n.getNode())->get_function()): "NULL")<<endl;
       dbg << "function = "<<SgNode2Str(isSgFunctionCallExp(n.getNode())->get_function())<<" function type="<<SgNode2Str(isSgFunctionCallExp(n.getNode())->get_function()->get_type())<<endl;
@@ -867,6 +872,7 @@ map<StxPartEdgePtr, bool> StxPart::getOutEdges()
       for(set<Function>::iterator c=callees.begin(); c!=callees.end(); c++)
         dbg << c->str()<<" declaration="<<c->get_declaration()<<"="<<SgNode2Str(c->get_declaration())<<endl;
     SIGHT_VERB_FI()
+#endif
 
     for(set<Function>::iterator c=callees.begin(); c!=callees.end(); c++) {
       StxPartEdgePtr edge = StxPartEdge::create(n, getStxFunc2Entry(*c), analysis);
@@ -916,8 +922,10 @@ map<StxPartEdgePtr, bool> StxPart::getOutEdges()
     SIGHT_VERB(dbg << "Definition n="<<CFGNode2Str(n)<<" func="<<func.get_name().getString()<<" isStxFuncExit(n)="<<isStxFuncExit(n)<<endl, 2, stxAnalysisDebugLevel)
 
     const set<SgFunctionCallExp*>& calls = func2Calls(func);
+#ifndef DISABLE_SIGHT
     SIGHT_VERB(dbg << "#calls="<<calls.size()<<" Connecting n="<<CFGNode2Str(n)<<endl, 2, stxAnalysisDebugLevel)
     SIGHT_VERB_DECL(indent, (), 2, stxAnalysisDebugLevel)
+#endif
     for(set<SgFunctionCallExp*>::const_iterator c=calls.begin(); c!=calls.end(); c++) {
       CFGNode callNode(*c, 3);
       StxPartEdgePtr edge = StxPartEdge::create(n, callNode, analysis, filter);
@@ -937,10 +945,12 @@ map<StxPartEdgePtr, bool> StxPart::getOutEdges()
   // If the current node is a return statement, connect it to the function's exit SgFunctionDefinition node
   } else if(SgReturnStmt* ret = isSgReturnStmt(n.getNode())) {
     Function func(SageInterface::getEnclosingFunctionDeclaration(ret));
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(2, stxAnalysisDebugLevel)
       dbg << "returning from func="<<func.str()<<endl;
       dbg << "Exit node="<<CFGNode2Str(getStxFunc2Exit(func))<<endl;
     SIGHT_VERB_FI()
+#endif
     StxPartEdgePtr edge = StxPartEdge::create(n, getStxFunc2Exit(func), analysis);
     if(edge) vStx[edge] = true;
 
@@ -1392,10 +1402,12 @@ StxValueObject::StxValueObject(SgNode* n) : ValueObject(n)//, AbstractionHierarc
 {
   // If a valid node is passed, check if it is an SgValue
   if(n) {
+#ifndef DISABLE_SIGHT
     SIGHT_VERB_IF(1, stxAnalysisDebugLevel)
       dbg << "StxValueObject::StxValueObject("<<SgNode2Str(n)<<")";
       dbg << " isSgCastExp(n)="<<isSgCastExp(n)<<" unwrapCasts(isSgCastExp(n))="<<(isSgCastExp(n) ? SgNode2Str(unwrapCasts(isSgCastExp(n))) : "NULL")<<" iscast="<<(isSgCastExp(n) ? isSgValueExp(unwrapCasts(isSgCastExp(n))) : 0)<<endl;
     SIGHT_VERB_FI()
+#endif
     if(isSgValueExp(n))
       val = isSgValueExp(n);
     // If this is a value that has been wrapped in many casts

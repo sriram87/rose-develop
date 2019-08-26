@@ -1,13 +1,17 @@
 #include "sage3basic.h"
-#include "latticeFull.h"
-
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <map>
+
 using namespace std;
+
+#include "latticeFull.h"
+
+#ifndef DISABLE_SIGHT
 #include "sight.h"
 using namespace sight;
+#endif
 
 namespace fuse {
   

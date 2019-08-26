@@ -1,7 +1,9 @@
 include $(top_srcdir)/config/Makefile.for.ROSE.includes.and.libs
 #include $(ROSE_WITH_SIGHT_INSTALL_PATH)/Makefile.extern
 
-bin_PROGRAMS = fuse fuseLayout
+bin_PROGRAMS = fuse
+
+#fuseLayout
 
 INCLUDES = \
 	$(ROSE_INCLUDES) \
@@ -15,6 +17,9 @@ INCLUDES = \
 	-I$(srcdir)/state 
 #    -I${srcdir}/sparse
 
+#	dbglog/dbglog.C \
+#	dbglog/widgets.C \
+#	dbglog/widgets/ats_graph.C
 fuse_SOURCES = \
 	analysis/abstract_object.C \
 	analysis/abstract_object_map.C \
@@ -31,9 +36,6 @@ fuse_SOURCES = \
 	cfgUtils/cfgUtils.C \
 	cfgUtils/DataflowCFG.C \
 	cfgUtils/VirtualCFGIterator.C \
-	dbglog/dbglog.C \
-	dbglog/widgets.C \
-	dbglog/widgets/ats_graph.C \
 	lattice/lattice.C \
 	simpleAnalyses/call_context_sensitivity_analysis.C \
 	simpleAnalyses/const_prop_analysis.C \
@@ -110,10 +112,10 @@ TEST_EXIT_STATUS = $(top_srcdir)/scripts/test_exit_status
 # FUSE LAYOUT #
 ###############
 SIGHT_CFLAGS=-DDISABLE_SIGHT
-fuseLayout_CXXFLAGS = $(SIGHT_CFLAGS)
-fuseLayout_LDFLAGS = $(ROSE_LIBS) $(LIBS_WITH_RPATH) $(SIGHT_LAYOUT_DYNAMIC_LINKFLAGS)
-fuseLayout_SOURCES = \
-	sight/widgets/ats_graph_layout.C
+#fuseLayout_CXXFLAGS = $(SIGHT_CFLAGS)
+#fuseLayout_LDFLAGS = $(ROSE_LIBS) $(LIBS_WITH_RPATH) $(SIGHT_LAYOUT_DYNAMIC_LINKFLAGS)
+#fuseLayout_SOURCES = \
+#	sight/widgets/ats_graph_layout.C
 ########
 # FUSE #
 ########
@@ -121,8 +123,9 @@ fuse_CXXFLAGS = -g -O0 $(SIGHT_CFLAGS) -DROSE_PREFIX="\"${top_builddir}\""
 fuse_LDADD = -lrose
 fuse_LDFLAGS = $(ROSE_LIBS) $(LIBS_WITH_RPATH) $(SIGHT_LINKFLAGS)
 
-fuse_DEPENDENCIES=fuseLayout
+#fuse_DEPENDENCIES=fuseLayout
 
+#	sight/widgets/ats_graph_structure.C
 fuse_SOURCES = \
 	abstraction/abstract_object.C \
 	abstraction/abstract_object_map.C \
@@ -143,7 +146,6 @@ fuse_SOURCES = \
 	cfgUtils/cfgUtils.C \
 	cfgUtils/DataflowCFG.C \
 	cfgUtils/VirtualCFGIterator.C \
-	sight/widgets/ats_graph_structure.C \
 	lattice/lattice.C \
 	simpleAnalyses/AnalysisAstAttribute.C \
 	simpleAnalyses/call_context_sensitivity_analysis.C \

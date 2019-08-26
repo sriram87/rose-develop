@@ -3,8 +3,10 @@
 #include "cfgUtils.h"
 #include <cassert>
 using namespace std;
+#ifndef DISABLE_SIGHT
 #include "sight.h"
 using namespace sight;
+#endif
 
 #define SgNULL_FILE Sg_File_Info::generateDefaultFileInfoForTransformationNode()
 

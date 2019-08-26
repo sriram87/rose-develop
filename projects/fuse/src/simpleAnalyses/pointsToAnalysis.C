@@ -1,8 +1,12 @@
 #include "sage3basic.h"
-#include "pointsToAnalysis.h"
 
 using namespace std;
+
+#include "pointsToAnalysis.h"
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse
 {
@@ -76,9 +80,11 @@ namespace fuse
   bool PointsToAnalysisTransfer::setLatticeCommon(MemLocObjectPtr ml, PointsToAnalysisTransfer::AbstractObjectSetPtr lat)
   {
     return productLattice->insert(ml, lat);
+#ifndef DISABLE_SIGHT
     if(pointsToAnalysisDebugLevel() >= 3) {
       dbg << productLattice->strp(parts.NodeState()->inEdgeFromAny());
     }
+#endif
   }
 
   // NOTE: requires extension for a full blown analysis
@@ -117,10 +123,12 @@ namespace fuse
       AbstractObjectSetPtr laos_p = getLatticeOperand(sgn, lhs_operand);
       AbstractObjectSetPtr raos_p = getLatticeOperand(sgn, rhs_operand);
 
+#ifndef DISABLE_SIGHT
       if(pointsToAnalysisDebugLevel() >= 3) {
         dbg << "laos_p=" << laos_p->str() << endl;
         dbg << "raos_p=" << raos_p->str() << endl;
       }
+#endif
 
       // Union the information
       // NOTE: points to information can be NULL
@@ -130,10 +138,11 @@ namespace fuse
         modified = laos_p->meetUpdate(dynamic_cast<Lattice*>(raos_p.get()));
       }
 
+#ifndef DISABLE_SIGHT
       if(pointsToAnalysisDebugLevel() >= 3) {
         dbg << "modified=" << modified << ", laos_p=" << laos_p->str() << endl;
       }
-
+#endif
       // If the set was updated then update the map as well.
       if(modified)
         modified = setLatticeOperand(sgn, lhs_operand, laos_p) || modified;
@@ -185,11 +194,12 @@ namespace fuse
 
   MemLocObjectPtr PointsToAnalysis::Expr2MemLoc(SgNode* sgn, PartEdgePtr pedge)
   {
-    scope reg(txt()<<"PointsToAnalysis::Expr2MemLoc(sgn=" << SgNode2Str(sgn) << ")", scope::medium, attrGE("pointsToAnalysisDebugLevel", 2));
+#ifndef DISABLE_SIGHT
+    scope reg(txt()<<"PointsToAnalysis::Expr2MemLoc(sgn=" << SgNode2Str(sgn) << ")", scope::medium, attrGE("pointsToAnalysisDebugLevel", 2)); 
     if(pointsToAnalysisDebugLevel()>=2) {
       dbg << "pedge=" << pedge->str() << endl;
     }
-
+#endif
     // ML object returned by Pointsto analysis
     boost::shared_ptr<PTMemLocObject> ptML_p = boost::make_shared<PTMemLocObject>(pedge, getComposer(), this);
 
@@ -216,13 +226,16 @@ namespace fuse
         assert(lattice);
         AbstractObjectMap* aom_p = dynamic_cast<AbstractObjectMap*>(lattice);
 
+#ifndef DISABLE_SIGHT
         if(pointsToAnalysisDebugLevel() >= 2) {
           dbg << "PointsToMap=" << aom_p->str() << endl;
         }
-
+#endif
         boost::shared_ptr<AbstractObjectSet> aos_p = boost::dynamic_pointer_cast<AbstractObjectSet>(aom_p->get(opML_p));
         assert(!aos_p->isEmpty());
+#ifndef DISABLE_SIGHT
         if(pointsToAnalysisDebugLevel() >= 2) dbg << "MLSet=" << aos_p->str() << endl;
+#endif
         ptML_p->add(aos_p, pedge, getComposer(), this);
         break;
       }

@@ -1,13 +1,19 @@
 #include <boost/foreach.hpp>
+using namespace std;
+
 #include "dynamicMonitor.h"
+
 #include "sageInterface.h"
 #include "sageBuilder.h"
 #include "StringUtility.h"
 
-using namespace std;
+
 using namespace SageInterface;
 using namespace SageBuilder;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 #define dynMonDL 0
 
@@ -329,6 +335,7 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
     modified = false;
 
     SIGHT_VERB_IF(1, dynMonDL)
+#ifndef DISABLE_SIGHT
     {scope s("frontier");
       for(map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr> >::iterator f=frontier.begin(); f!=frontier.end(); ++f) {
         scope s2(txt()<<"Use "<<f->first->str());
@@ -349,12 +356,14 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
       dbg << d->str()<<endl;
     }
     }
+#endif
     SIGHT_VERB_FI()
 
     map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr> > newFrontier = frontier;
     set<SSAMemLocObjectPtr> newFreshFrontier;
 
-    {SIGHT_VERB_DECL(scope, ("Frontier iteration"), 1, dynMonDL)
+    {
+      SIGHT_VERB_DECL(scope, ("Frontier iteration"), 1, dynMonDL)
     // Iterate over all the defs on the frontier
     //for(map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr> >::iterator f=frontier.begin(); f!=frontier.end(); ++f) {
     BOOST_FOREACH(const SSAMemLocObjectPtr& frontierKey, freshFrontier) {
@@ -429,8 +438,8 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
                   // Do not add f->first onto newFreshFrontier since we've now abandoned the search
                   // for defs that reach this use
                   SIGHT_VERB(dbg << "Stopping search for defs reaching "<<u2rd->first->str()<<endl, 1, dynMonDL)
-                } else
-                   SIGHT_VERB(dbg << "Tried to stop search for defs reaching "<<u2rd->first->str()<<", but another search path discovered"<<endl, 1, dynMonDL)
+                    } else {
+                  SIGHT_VERB(dbg << "Tried to stop search for defs reaching "<<u2rd->first->str()<<", but another search path discovered"<<endl, 1, dynMonDL) }
               }
             } else if(f->first->getAccess()==SSAMemLocObject::use) {
               if(visitedPair.find(make_pair(f->first, rd)) == visitedPair.end()) {
@@ -448,8 +457,8 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
                   // Do not add f->first onto newFreshFrontier since we've now abandoned the search
                   // for defs that reach this use
                   SIGHT_VERB(dbg << "Stopping search for defs reaching "<<f->first->str()<<endl, 1, dynMonDL)
-                } else
-                  SIGHT_VERB(dbg << "Tried to stop search for defs reaching "<<f->first->str()<<", but another search path discovered"<<endl, 1, dynMonDL)
+                    } else {
+                  SIGHT_VERB(dbg << "Tried to stop search for defs reaching "<<f->first->str()<<", but another search path discovered"<<endl, 1, dynMonDL) }
               }
             }
           }
@@ -550,6 +559,7 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
 //  frontier.insert(startingDef);
 
   SIGHT_VERB_IF(1, dynMonDL)
+#ifndef DISABLE_SIGHT
   {scope s("frontier");
     for(map<SSAMemLocObjectPtr, set<SSAMemLocObjectPtr> >::iterator f=frontier.begin(); f!=frontier.end(); ++f) {
       scope s2(txt()<<"Use "<<f->first->str());
@@ -564,6 +574,7 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
       dbg << d->str()<<endl;
     }
   }
+#endif
   SIGHT_VERB_FI()
 
   set<SSAMemLocObjectPtr> finalFrontier;
@@ -577,11 +588,13 @@ std::set<SSAMemLocObjectPtr> DynamicMonitor::collectReachingDefs(SSAMemLocObject
   }
 
   SIGHT_VERB_IF(1, dynMonDL)
+#ifndef DISABLE_SIGHT
   {scope s("finalFrontier");
     BOOST_FOREACH(const SSAMemLocObjectPtr& d, finalFrontier) {
       dbg << d->str()<<endl;
     }
   }
+#endif
   SIGHT_VERB_FI()
 
   return finalFrontier;
@@ -626,8 +639,9 @@ void DynamicMonitor::runAnalysis() {
 
     // Skip boring parts
     if(!isInteresting(cn.getNode())) continue;
-
+#ifndef DISABLE_SIGHT
     scope s(part->str());
+#endif
     const set<SSAMemLocObjectPtr>& defs = ssa->getDefs(part);
     SIGHT_VERB(dbg << "  #defs="<<defs.size()<<endl, 1, dynMonDL)
     BOOST_FOREACH(const SSAMemLocObjectPtr& d, defs) {

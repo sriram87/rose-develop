@@ -1,10 +1,13 @@
 #include "sage3basic.h"
+using namespace std;
+
 #include "live_dead_analysis.h"
 #include "compose.h"
 #include <boost/make_shared.hpp>
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse {
 #define liveDeadAnalysisDebugLevel 0
@@ -110,9 +113,11 @@ public:
       if(!ldmt.isMemLocLive(sgn)) return;
 
       SIGHT_VERB_IF(1, liveDeadAnalysisDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "LDMAExpressionTransfer::visit(SgAssignInitializer *sgn)"<<endl;
         dbg << "&nbsp;&nbsp;&nbsp;&nbsp;sgn="<<SgNode2Str(sgn)<<endl;
         dbg << "&nbsp;&nbsp;&nbsp;&nbsp;sgn->get_operand()="<<SgNode2Str(sgn->get_operand())<<endl;
+#endif
       SIGHT_VERB_FI()
       ldmt.use(sgn, sgn->get_operand());
     }
@@ -335,9 +340,11 @@ LiveDeadMemTransfer::LiveDeadMemTransfer(AnalysisParts& parts, CFGNode cn, NodeS
   liveLat = dynamic_cast<AbstractObjectSet*>(*(dfInfo[parts.index()->outEdgeToAny()].begin()));
 
   SIGHT_VERB_IF(1, liveDeadAnalysisDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "LiveDeadMemTransfer: liveLat=";
     indent ind;
     dbg << liveLat->str("")<<endl;
+#endif
   SIGHT_VERB_FI()
   // Make sure that all the lattice is initialized
   liveLat->initialize();
@@ -417,9 +424,11 @@ void LiveDeadMemTransfer::useMem(SgPntrArrRefExp* sgn)
   // !!!   MemLocs that makes it easy to not explicitly maintain array indexes.
 
   SIGHT_VERB_IF(1, liveDeadAnalysisDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "LiveDeadMemTransfer::useMem(SgPntrArrRefExp)("<<SgNode2Str(sgn)<<")"<<endl;
     dbg << "LHS="<<SgNode2Str(sgn->get_lhs_operand())<<endl;
     dbg << "RHS="<<SgNode2Str(sgn->get_rhs_operand())<<endl;
+#endif
   SIGHT_VERB_FI()
   MemLocObjectPtr p = composer->Expr2MemLoc(sgn, parts.NodeState()->outEdgeToAny(), ldma);
   // If a memory object is available, insert it. Not all SgPntrArrRefExps correspond to a real memory location.
@@ -451,10 +460,14 @@ bool LiveDeadMemTransfer::isMemLocLive(SgExpression* sgn) {
   // MemLocObjectPtrPair p = composer->Expr2MemLoc(sgn, part->outEdgeToAny(), ldma);//ceml->Expr2Obj(expr);
   // return (p.expr ? liveLat->containsMay(p.expr) : false) ||
   //        (p.mem  ? liveLat->containsMay(p.mem)  : false);
+#ifndef DISABLE_SIGHT
 dbg << "LiveDeadMemTransfer::isMemLocLive("<<SgNode2Str(sgn)<<")"<<endl;
 dbg << "liveLat="<<liveLat->str()<<endl;
+#endif
   MemLocObjectPtr p = composer->Expr2MemLoc(sgn, parts.NodeState()->outEdgeToAny(), ldma);//ceml->Expr2Obj(expr);
+#ifndef DISABLE_SIGHT
 dbg << "p="<<p->str()<<endl;
+#endif
   return (p ? liveLat->containsMay(p) : false);
 }
 
@@ -588,6 +601,7 @@ bool LiveDeadMemTransfer::finish()
   // First process assignments, then uses since we may assign and use the same variable
   // and in the end we want to first remove it and then re-insert it.
   SIGHT_VERB_IF(1, liveDeadAnalysisDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "used="<<endl;
     { indent ind;
     for(AbstractObjectSet::const_iterator asgn=used.begin(); asgn!=used.end(); asgn++) {
@@ -603,6 +617,7 @@ bool LiveDeadMemTransfer::finish()
     dbg << "liveLat="<<endl;
     {indent ind;
      dbg << liveLat->str("")<<endl;}
+#endif
   SIGHT_VERB_FI()
 
   /* Live-In (node) = use(node) + (Live-Out (node) - Assigned (b))
@@ -875,8 +890,10 @@ bool isLiveMay(MemLocObjectPtr mem, LiveDeadMemAnalysis* ldma, PartEdgePtr pedge
 {
   SIGHT_VERB(scope reg("isLiveMay()", scope::medium), 1, liveDeadAnalysisDebugLevel)
   SIGHT_VERB_IF(1, liveDeadAnalysisDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "mem="<<mem->str("")<<endl;
     dbg << "pedge="<<pedge->str()<<endl;
+#endif
   SIGHT_VERB_FI()
 
   AnalysisPartEdges pedges = ldma->NodeState2All(pedge);

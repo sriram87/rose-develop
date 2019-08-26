@@ -1,4 +1,7 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "const_prop_analysis.h"
 #include "dead_path_elim_analysis.h"
 #include "tight_composer.h"
@@ -8,8 +11,10 @@
 #include "fuseCommandParser.h"
 #include "const_prop_count.h"
 
+#ifndef DISABLE_SIGHT
 using namespace sight;
-using namespace std;
+#endif
+
 using namespace boost::xpressive;
 
 namespace fuse {

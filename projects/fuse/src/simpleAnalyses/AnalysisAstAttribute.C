@@ -1,6 +1,10 @@
+#include "sage3basic.h"
+
+using namespace std;
+
 #include "AnalysisAstAttribute.h"
 #include "const_prop_analysis.h"
-#include "sage3basic.h"
+
 #include <typeinfo>
 
 /*****************************************

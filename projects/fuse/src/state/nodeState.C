@@ -1,10 +1,14 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "nodeState.h"
 #include "compose.h"
 #include <boost/make_shared.hpp>
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse {
 #define nodeStateDebugLevel 0
@@ -96,10 +100,12 @@ const std::map<PartEdgePtr, std::vector<Lattice*> >& NodeState::getLatticeAboveA
 const std::map<PartEdgePtr, std::vector<Lattice*> >& NodeState::getLatticeBelowAll(Analysis* analysis) const
 {
   if(dfInfoBelow.find(analysis) == dfInfoBelow.end()) {
+#ifndef DISABLE_SIGHT
     scope s(txt()<<"ERROR: no entry for analysis "<<(dynamic_cast<ComposedAnalysis*>(analysis))->str());
     dbg << "Entries exist for:"<<endl;
     for(map<Analysis*, std::map<PartEdgePtr, std::vector<Lattice*> > >::const_iterator i=dfInfoBelow.begin(); i!=dfInfoBelow.end(); ++i)
       dbg << (dynamic_cast<ComposedAnalysis*>(i->first))->str()<<endl;
+#endif
   }
   assert(dfInfoBelow.find(analysis) != dfInfoBelow.end());
   return dfInfoBelow.find(analysis)->second;
@@ -113,11 +119,13 @@ Lattice* NodeState::meetLatticeMapInfo(const LatticeMap& dfMap,
   LatticeMap::const_iterator a;
   a = dfMap.find(analysis);
   if(a == dfMap.end()) {
+#ifndef DISABLE_SIGHT
     dbg << "dfMap.find("<<analysis<<")!=dfMap.end() = "
         <<(dfMap.find((Analysis*)analysis) != dfMap.end())
         <<" dfMap.size()="<<dfMap.size()<<endl;
     for(LatticeMap::const_iterator i=dfMap.begin(); i!=dfMap.end(); i++)
     { dbg << "i="<<i->first<<endl; }
+#endif
     assert(0);
   }
 
@@ -157,9 +165,11 @@ Lattice* NodeState::meetLatticeMapInfo(const LatticeMap& dfMap,
   assert(pedge && pedge->source() && pedge->target());
   retLattice = (eLM->second)[latticeName]->copy();
   SIGHT_VERB_IF(2, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "pedge=" << pedge->str()
         << ", lat@pedge=" << (eLM->second)[latticeName]->str()
         << ", retLattice=" << retLattice->str() << endl;
+#endif
   SIGHT_VERB_FI()
   ++eLM;
   // meet with all other lattices
@@ -168,9 +178,11 @@ Lattice* NodeState::meetLatticeMapInfo(const LatticeMap& dfMap,
     assert(pedge->source() && pedge->target());
     retLattice->meetUpdate((eLM->second)[latticeName]);
     SIGHT_VERB_IF(2, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "pedge=" << pedge->str()
         << ", lat@pedge=" << (eLM->second)[latticeName]->str()
         << ", retLattice=" << retLattice->str() << endl;
+#endif
     SIGHT_VERB_FI()
   }
   return retLattice;
@@ -199,9 +211,11 @@ Lattice* NodeState::getLatticeAbove(Analysis* analysis, PartEdgePtr departEdge, 
 {
   SIGHT_VERB_DECL(scope, ("NodeState::getLatticeAbove", scope::medium), 2, nodeStateDebugLevel);
   SIGHT_VERB_IF(2, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "analysis=" << dynamic_cast<ComposedAnalysis*>(analysis)->str()
         << ", PartEdge=" << (departEdge? departEdge->str() : "NULL")
         << ", latticeName=" << latticeName << endl;
+#endif
   SIGHT_VERB_FI()
 
   // We must get either a concrete edge or inEdgeFromAny
@@ -235,9 +249,11 @@ Lattice* NodeState::getLatticeBelow(Analysis* analysis, PartEdgePtr departEdge, 
 {
   SIGHT_VERB_DECL(scope, ("NodeState::getLatticeBelow", scope::medium), 2, nodeStateDebugLevel);
   SIGHT_VERB_IF(2, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
     dbg << "analysis=" << dynamic_cast<ComposedAnalysis*>(analysis)->str()
         << ", PartEdge=" << (departEdge? departEdge->str() : "NULL")
         << ", latticeName=" << latticeName << endl;
+#endif
   SIGHT_VERB_FI()
 
   // We must get a concrete edge or outEdgeToAny
@@ -367,13 +383,17 @@ Lattice* NodeState::getLattice_ex(const LatticeMap& dfMap, Analysis* analysis,
   /* GB: no longer checking for this since sometimes it is possible for a client
    *     to ask a server about Parts where the server does not have state*/
   if(!analysisDataExists(dfMap, analysis)) {
+#ifndef DISABLE_SIGHT
     scope s("NodeState::getLattice_ex: Analysis not found!", scope::medium);
+#endif
     ComposedAnalysis* compAnalysis = dynamic_cast<ComposedAnalysis*>(analysis);
+#ifndef DISABLE_SIGHT
     if(compAnalysis) dbg<<"analysis="<<compAnalysis->str()<<endl;
     dbg << "#dfMap="<<dfMap.size()<<endl;
     dbg << "dfMap.find("<<analysis<<")!=dfMap.end() = "<<(dfMap.find((Analysis*)analysis) != dfMap.end())<<" dfMap.size()="<<dfMap.size()<<endl;
     for(LatticeMap::const_iterator i=dfMap.begin(); i!=dfMap.end(); i++)
     { dbg << "i="<<i->first<<endl; }
+#endif
     assert(0);
   }
   /* No analysis state was mapped at this edge
@@ -544,15 +564,19 @@ bool NodeState::unionLatticeMaps(map<PartEdgePtr, vector<Lattice*> >& to,
     vector<Lattice*>::iterator       lTo;
     vector<Lattice*>::const_iterator lFrom;
     SIGHT_VERB_IF(2, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
       dbg << "eFrom->first="<<eFrom->first->str()<<endl;
       dbg << "eTo->first="<<eTo->first->str()<<endl;
       dbg << "#eFrom->second="<<eFrom->second.size()<<", #eTo->second="<<eTo->second.size()<<endl;
+#endif
     SIGHT_VERB_FI()
     for(lTo=eTo->second.begin(), lFrom=eFrom->second.begin(); lTo!=eTo->second.end(); lTo++, lFrom++) {
       SIGHT_VERB_IF(1, nodeStateDebugLevel)
+#ifndef DISABLE_SIGHT
         dbg << "lTo="<<(*lTo? (*lTo)->str() : "NULL")<<endl;
         dbg << "lFrom="<<(*lFrom? (*lFrom)->str() : "NULL")<<endl;
         dbg << "(*lTo)->finiteLattice()="<<(*lTo)->finiteLattice()<<endl;
+#endif
       SIGHT_VERB_FI()
       if((*lTo)->finiteLattice()) {
         modified = (*lTo)->meetUpdate(*lFrom) || modified;

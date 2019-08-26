@@ -1,4 +1,7 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "saveDotAnalysis.h"
 #include "partitions.h"
 #include "compose.h"
@@ -6,15 +9,18 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <sstream>
 
-using namespace std;
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
 
 namespace fuse {
 /***********************
  *** SaveDotAnalysis ***
  ***********************/
 
+#ifndef DISABLE_SIGHT
 DEBUG_LEVEL(saveDotAnalysisDebugLevel, 0);
+#endif
 
 // Helper function to print Part information
 void printPart(std::ostream &o, map<PartPtr, partDotInfoPtr>& partInfo, PartPtr part, string indent);
@@ -385,7 +391,9 @@ class Ctxt2PartsMap_Leaf_Generator_Base : public Ctxt2PartsMap_Leaf_Generator {
 
 std::ostream & ats2dot(std::ostream &o, std::string graphName, set<PartPtr>& startParts, set<PartPtr>& endParts)
 {
+#ifndef DISABLE_SIGHT
   scope reg("ats2dot", scope::high, attrGE("saveDotAnalysisDebugLevel", 1));
+#endif
   o << "digraph " << graphName << " {"<<endl;
   
   // Maps parts to their unique IDs
@@ -406,13 +414,17 @@ std::ostream & ats2dot(std::ostream &o, std::string graphName, set<PartPtr>& sta
   cout << "end=("<<&end<<")="<< end.str() << endl;
   
   for(fw_partEdgeIterator state(startParts); state!=fw_partEdgeIterator::end(); state++) {*/
+#ifndef DISABLE_SIGHT
   { scope s("startParts");
   for(set<PartPtr>::const_iterator p=startParts.begin(); p!=startParts.end(); ++p)
     dbg << (*p)->str()<<endl;
   }
+#endif
 
   for(fw_partEdgeIterator state(startParts, /*incrementalGraph*/ false); !state.isEnd(); state++) {
     PartPtr part = state.getPart();
+    
+#ifndef DISABLE_SIGHT
     scope reg2(txt()<<"ats2dot: part="<<getPartUID(partInfo, part)<<"="<<part->str(), scope::medium, attrGE("saveDotAnalysisDebugLevel", 1));
     if(saveDotAnalysisDebugLevel()>=1) {
       dbg << "context="<<part->getContext()->str()<<endl;
@@ -423,9 +435,12 @@ std::ostream & ats2dot(std::ostream &o, std::string graphName, set<PartPtr>& sta
         dbg << i->first->str()<<endl;
       } }*/
     }
+#endif
     
     list<list<PartContextPtr> > key = part->getContext()->getDetailedPartContexts();
+#ifndef DISABLE_SIGHT
     if(saveDotAnalysisDebugLevel()>=1) dbg << "#key="<<key.size()<<endl;
+#endif
     if(key.size()==0) {
       DummyContext d;
       key.push_back(d.getSubPartContexts());
@@ -499,7 +514,9 @@ std::ostream & ats2dot(std::ostream &o, std::string graphName, set<PartPtr>& sta
 
 std::ostream & ats2dot_bw(std::ostream &o, std::string graphName, set<PartPtr>& startParts, set<PartPtr>& endParts)
 {
+#ifndef DISABLE_SIGHT
   scope reg("ats2dot_bw", scope::high, attrGE("saveDotAnalysisDebugLevel", 1));
+#endif
   o << "digraph " << graphName << " {"<<endl;
   
   //dbg << "#endParts="<<endParts.size()<<endl;
@@ -519,13 +536,15 @@ std::ostream & ats2dot_bw(std::ostream &o, std::string graphName, set<PartPtr>& 
   for(bw_partEdgeIterator state(endParts, /*incrementalGraph*/ false); !state.isEnd(); state++) {
     PartPtr part = state.getPart();
 //cout << "==== part="<<part->str()<<endl;
+#ifndef DISABLE_SIGHT
     scope reg(txt()<<"ats2dot: part="<<getPartUID(partInfo, part)<<"="<<part->str(), scope::medium, attrGE("saveDotAnalysisDebugLevel", 1));
     if(saveDotAnalysisDebugLevel()>=1) {
       dbg << "state="<<state.str()<<endl;
       dbg << "*state="<<part->str()<<" context="<<part->getContext()->str()<<endl;
       dbg << "pedge="<<state.getPartEdge()->str()<<endl;
     }
-    
+#endif
+
     list<list<PartContextPtr> > key = part->getContext()->getDetailedPartContexts();
     if(key.size()==0) {
       DummyContext d;

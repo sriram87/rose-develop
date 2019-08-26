@@ -1,4 +1,7 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "compose.h"
 #include "fuseCommandParser.h"
 #include "const_prop_analysis.h"
@@ -15,23 +18,30 @@
 #include "saveDotAnalysis.h"
 
 
-using namespace std;
+
 using namespace fuse;
+
+#ifndef DISABLE_SIGHT
 using namespace sight;
+#endif
+
 using namespace boost::xpressive;
 
 void FuseInit(int argc, char** argv) {
+#ifndef DISABLE_SIGHT
   // Command to set up the enviroment variable to find the binary fuseLayout
   // fuseLayout is required to run fuse
   // fuseLayout binary is at the same level as fuse in the build tree
   // When compiling fuse ROSE_PREFIX is defined as -DROSE_PREFIX="\"${top_builddir}\"" which
   // is top of the build tree
-  // If fuse fails to find fuseLayout set up this environment variable appropriately. 
+  // If fuse fails to find fuseLayout set up this environment variable appropriately.
+
   setenv("SIGHT_LAYOUT_EXEC", (txt()<<ROSE_PREFIX<<"/projects/fuse/src/fuseLayout").c_str(), 1);
 
   string title = (txt() << "Process " << " Debug Output").c_str();
   string workdir = (txt() << "dbg").c_str();
   SightInit(argc, argv, title, workdir);
+#endif
 }
 
 int main(int argc, char* argv[])

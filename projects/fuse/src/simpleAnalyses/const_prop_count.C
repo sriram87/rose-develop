@@ -1,13 +1,16 @@
 #include "sage3basic.h"
+
+using namespace std;
+
 #include "analysis.h"
 #include "composed_analysis.h"
 #include "compose.h"
 #include "printAnalysisStates.h"
-#include "ats_graph_structure.h"
 #include "const_prop_count.h"
 
-
-using namespace std;
+#ifndef DISABLE_SIGHT
+#include "ats_graph_structure.h"
+#endif
 
 namespace fuse {
   ConstPropCountAnalysis::ConstPropCountAnalysis() :FWDataflow(false, false),
